@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Creative Portfolio & Projects</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts & FontAwesome for Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- Background Animated Glow Orbs -->
+    <div class="bg-glow glow-1"></div>
+    <div class="bg-glow glow-2"></div>
+    <div class="bg-glow glow-3"></div>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <i class="fa-solid fa-code"></i>
+                <span>RickDevr Portfolio</span>
+            </div>
+            <p class="subtitle">Explore my interactive web apps, games, tools, and creative experiments.</p>
+            
+            <!-- Category Filter Buttons -->
+            <div class="filter-bar" id="filterBar">
+                <button class="filter-btn active" data-category="All">All Projects</button>
+            </div>
+        </header>
+
+        <!-- Projects Grid -->
+        <main class="projects-grid" id="projectsGrid">
+            <!-- Dynamically populated by script.js -->
+        </main>
+    </div>
+
+    <!-- Project Detail Modal View -->
+    <div class="modal-overlay" id="projectModal">
+        <div class="modal-content">
+            <button class="modal-close" id="modalClose"><i class="fa-solid fa-xmark"></i></button>
+            
+            <div class="modal-body">
+                <!-- Media Carousel / Slider Column -->
+                <div class="modal-media-section">
+                    <div class="media-slider" id="mediaSlider">
+                        <!-- Slide items inserted via JS -->
+                    </div>
+                    <div class="slider-controls" id="sliderControls">
+                        <button class="slide-btn prev-btn" id="prevSlide"><i class="fa-solid fa-chevron-left"></i></button>
+                        <div class="slider-dots" id="sliderDots"></div>
+                        <button class="slide-btn next-btn" id="nextSlide"><i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+                </div>
+
+                <!-- Info & Description Column -->
+                <div class="modal-info-section">
+                    <span class="modal-category" id="modalCategory">Category</span>
+                    <h2 class="modal-title" id="modalTitle">Project Title</h2>
+                    <p class="modal-description" id="modalDescription">Detailed project description goes here...</p>
+                    
+                    <div class="modal-actions">
+                        <a href="#" class="btn-primary" id="modalVisitBtn" target="_blank" rel="noopener noreferrer">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i> Visit Website
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
