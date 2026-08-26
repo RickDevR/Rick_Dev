@@ -44,7 +44,7 @@ const projects = [
         category: "Projects",
         description: "Relaxing interactive audio-visual toy featuring satisfying squishy physics.",
         media: [
-            { type: "video", src: "yitz-preview.mp4" }
+            { type: "image", src: "Squishy.png" }
         ]
     },
     {
