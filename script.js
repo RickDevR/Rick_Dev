@@ -23,7 +23,7 @@ const projects = [
         tech: ["HTML", "Tailwind", "JS"],
         exploreTime: "Est. 2 min explore",
         likes: 8,
-        media: [] // Auto live preview fallback
+        media: []
     },
     {
         name: "Secret coding language decode and Ecode",
@@ -83,10 +83,10 @@ const projects = [
         name: "DJ Bored",
         url: "https://rickdevr.github.io/DJ-board-today-s-Tuesday/",
         category: "Tools",
-        description: " Here you could remix Audios by using ADJ board",
-        tech: ["HTML", "JS", "LocalStorage"],
+        description: "Here you could remix Audios by using a DJ board.",
+        tech: ["HTML", "JS", "Audio"],
         exploreTime: "Est. 4 min explore",
-        likes: 31,
+        likes: 500000000,
         media: []
     }
 ];
@@ -132,13 +132,11 @@ document.addEventListener("DOMContentLoaded", () => {
     let searchQuery = "";
     let currentActiveProject = null;
 
-    // Load saved likes & theme from localStorage if available
     projects.forEach((p, i) => {
         const savedLikes = localStorage.getItem(`project_likes_${i}`);
         if (savedLikes !== null) p.likes = parseInt(savedLikes);
     });
 
-    // 1. Dark/Light Mode Theme Toggle
     themeToggle.addEventListener("click", () => {
         document.body.classList.toggle("light-mode");
         document.body.classList.toggle("dark-mode");
@@ -149,16 +147,13 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // 2. Build Category Filters
     const categories = ["All", ...new Set(projects.map(p => p.category))];
     filterBar.innerHTML = categories.map(cat => `
         <button class="filter-btn ${cat === 'All' ? 'active' : ''}" data-category="${cat}">${cat}</button>
     `).join("");
 
-    // Update Footer Stats
     footerStats.textContent = `Total Projects: ${projects.length} | Active Categories: ${categories.length - 1}`;
 
-    // 3. Render Projects Grid
     function renderProjects() {
         let filtered = projects.filter(p => {
             const matchesCat = activeCategory === "All" || p.category === activeCategory;
@@ -166,7 +161,6 @@ document.addEventListener("DOMContentLoaded", () => {
             return matchesCat && matchesSearch;
         });
 
-        // Sorting logic
         if (sortSelect.value === "az") {
             filtered.sort((a, b) => a.name.localeCompare(b.name));
         } else if (sortSelect.value === "za") {
@@ -212,7 +206,6 @@ document.addEventListener("DOMContentLoaded", () => {
             `;
         }).join("");
 
-        // Click listeners to open modal
         document.querySelectorAll(".project-card").forEach(card => {
             card.addEventListener("click", () => {
                 const projectIndex = card.getAttribute("data-index");
@@ -223,7 +216,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     renderProjects();
 
-    // Event Listeners for filters & search
     filterBar.addEventListener("click", (e) => {
         if (e.target.classList.contains("filter-btn")) {
             document.querySelectorAll(".filter-btn").forEach(btn => btn.classList.remove("active"));
@@ -240,13 +232,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     sortSelect.addEventListener("change", renderProjects);
 
-    // 4. Surprise Me Button
     surpriseBtn.addEventListener("click", () => {
         const randomIndex = Math.floor(Math.random() * projects.length);
         openModal(projects[randomIndex]);
     });
 
-    // 5. Export JSON Button
     exportBtn.addEventListener("click", () => {
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(projects, null, 2));
         const downloadAnchor = document.createElement('a');
@@ -257,7 +247,6 @@ document.addEventListener("DOMContentLoaded", () => {
         downloadAnchor.remove();
     });
 
-    // 6. Keyboard Shortcuts (Ctrl + K for search, Esc to close)
     document.addEventListener("keydown", (e) => {
         if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
             e.preventDefault();
@@ -270,7 +259,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // 7. Modal & Slider Controls
     function openModal(project) {
         currentActiveProject = project;
         modalTitle.textContent = project.name;
@@ -280,10 +268,7 @@ document.addEventListener("DOMContentLoaded", () => {
         modalExploreTime.innerHTML = `<i class="fa-regular fa-clock"></i> ${project.exploreTime || 'Est. 2 min explore'}`;
         likeCountSpan.textContent = project.likes;
 
-        // Render tech stack pills inside modal
         modalTechStack.innerHTML = project.tech ? project.tech.map(t => `<span class="modal-tech-pill">${t}</span>`).join("") : "";
-
-        // Check live status ping simulation
         liveStatusBadge.innerHTML = `<span class="pulse-dot"></span> Online & Active`;
 
         if (project.media && project.media.length > 0) {
@@ -311,7 +296,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (e.target === modal) closeModal();
     });
 
-    // Copy Link Action
     modalCopyBtn.addEventListener("click", () => {
         navigator.clipboard.writeText(modalVisitBtn.href);
         const originalText = modalCopyBtn.innerHTML;
@@ -319,7 +303,6 @@ document.addEventListener("DOMContentLoaded", () => {
         setTimeout(() => { modalCopyBtn.innerHTML = originalText; }, 2000);
     });
 
-    // Like Button Action
     modalLikeBtn.addEventListener("click", () => {
         if (currentActiveProject) {
             currentActiveProject.likes++;
