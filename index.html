@@ -3,51 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Creative Portfolio & Projects</title>
+    <title>RickDevr | Ultimate Creative Portfolio</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Google Fonts & FontAwesome for Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Google Fonts & FontAwesome Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
+<body class="dark-mode">
 
-    <!-- Background Animated Glow Orbs -->
+    <!-- Animated Background Glow Orbs & Grid -->
     <div class="bg-glow glow-1"></div>
     <div class="bg-glow glow-2"></div>
     <div class="bg-glow glow-3"></div>
+    <div class="bg-grid"></div>
 
     <div class="app-container">
-        <!-- Header -->
+        <!-- Top Utility Bar: Theme Toggle & Surprise Me -->
+        <div class="top-nav">
+            <button class="utility-btn" id="surpriseBtn" title="Surprise Me!">
+                <i class="fa-solid fa-dice"></i> <span>Surprise Me!</span>
+            </button>
+            <div class="nav-right-actions">
+                <button class="utility-btn" id="exportBtn" title="Download Projects JSON">
+                    <i class="fa-solid fa-download"></i> <span>Export JSON</span>
+                </button>
+                <button class="utility-btn theme-toggle" id="themeToggle" title="Toggle Theme">
+                    <i class="fa-solid fa-moon" id="themeIcon"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Header Section -->
         <header class="header">
-            <div class="logo">
-                <i class="fa-solid fa-code"></i>
-                <span>RickDevr Portfolio</span>
+            <div class="logo-badge animate-pop">
+                <i class="fa-solid fa-bolt-lightning"></i>
+                <span>RickDevr Ecosystem</span>
             </div>
-            <p class="subtitle">Explore my interactive web apps, games, tools, and creative experiments.</p>
+            <h1 class="main-title">Interactive Web Portfolio & Apps</h1>
+            <p class="subtitle">Explore custom web applications, games, tools, and creative experiments built with modern frontend architecture.</p>
             
-            <!-- Category Filter Buttons -->
-            <div class="filter-bar" id="filterBar">
-                <button class="filter-btn active" data-category="All">All Projects</button>
+            <!-- Search, Filters, & Sorting Bar -->
+            <div class="controls-bar">
+                <div class="search-box">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="searchInput" placeholder="Search projects or tech... (Press Ctrl+K)">
+                </div>
+                
+                <div class="filter-sort-wrapper">
+                    <div class="filter-bar" id="filterBar"></div>
+                    <select id="sortSelect" class="sort-select">
+                        <option value="default">Sort: Featured</option>
+                        <option value="az">A - Z</option>
+                        <option value="za">Z - A</option>
+                    </select>
+                </div>
             </div>
+            
+            <div class="stats-counter" id="statsCounter">Showing all projects</div>
         </header>
 
         <!-- Projects Grid -->
         <main class="projects-grid" id="projectsGrid">
-            <!-- Dynamically populated by script.js -->
+            <!-- Dynamically populated -->
         </main>
+
+        <!-- Footer Stats -->
+        <footer class="footer">
+            <p id="footerStats">Total Projects: 7 | Active Categories: 3</p>
+        </footer>
     </div>
 
-    <!-- Project Detail Modal View -->
+    <!-- Enhanced Project Detail Modal View -->
     <div class="modal-overlay" id="projectModal">
         <div class="modal-content">
             <button class="modal-close" id="modalClose"><i class="fa-solid fa-xmark"></i></button>
             
             <div class="modal-body">
-                <!-- Media Carousel / Slider Column -->
+                <!-- Media Carousel / Slider Section -->
                 <div class="modal-media-section">
-                    <div class="media-slider" id="mediaSlider">
-                        <!-- Slide items inserted via JS -->
-                    </div>
+                    <div class="media-slider" id="mediaSlider"></div>
                     <div class="slider-controls" id="sliderControls">
                         <button class="slide-btn prev-btn" id="prevSlide"><i class="fa-solid fa-chevron-left"></i></button>
                         <div class="slider-dots" id="sliderDots"></div>
@@ -55,16 +89,30 @@
                     </div>
                 </div>
 
-                <!-- Info & Description Column -->
+                <!-- Info & Actions Section -->
                 <div class="modal-info-section">
-                    <span class="modal-category" id="modalCategory">Category</span>
+                    <div class="modal-meta-top">
+                        <span class="modal-category" id="modalCategory">Category</span>
+                        <span class="modal-live-badge" id="liveStatusBadge"><span class="pulse-dot"></span> Checking Status...</span>
+                    </div>
                     <h2 class="modal-title" id="modalTitle">Project Title</h2>
-                    <p class="modal-description" id="modalDescription">Detailed project description goes here...</p>
+                    
+                    <!-- Tech Stack Tags -->
+                    <div class="modal-tech-stack" id="modalTechStack"></div>
+
+                    <p class="modal-description" id="modalDescription">Description...</p>
+                    <p class="modal-explore-time" id="modalExploreTime"><i class="fa-regular fa-clock"></i> Est. 2 min explore time</p>
                     
                     <div class="modal-actions">
                         <a href="#" class="btn-primary" id="modalVisitBtn" target="_blank" rel="noopener noreferrer">
-                            <i class="fa-solid fa-arrow-up-right-from-square"></i> Visit Website
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i> Launch Website
                         </a>
+                        <button class="btn-secondary" id="modalCopyBtn">
+                            <i class="fa-solid fa-copy"></i> Copy Link
+                        </button>
+                        <button class="btn-like" id="modalLikeBtn">
+                            <i class="fa-solid fa-heart"></i> <span id="likeCount">0</span>
+                        </button>
                     </div>
                 </div>
             </div>

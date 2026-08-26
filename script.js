@@ -7,8 +7,12 @@ const projects = [
         url: "https://rickdevr.github.io/Yitz-pitz-cast/",
         category: "Entertainment",
         description: "Catch up on episodes and audio content and listen to the latest streams.",
+        tech: ["HTML", "CSS", "JS", "Audio API"],
+        exploreTime: "Est. 3 min explore",
+        likes: 12,
         media: [
-            { type: "video", src: "POS.mp4" }
+            { type: "video", src: "POS.mp4" },
+            { type: "video", src: "yitz-preview.mp4" }
         ]
     },
     {
@@ -16,33 +20,39 @@ const projects = [
         url: "https://rickdevr.github.io/Task/",
         category: "Games",
         description: "Test your speed and complete interactive mini-challenges under tight time limits.",
-        media: [
-            { type: "image", src: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80" }
-        ]
+        tech: ["HTML", "Tailwind", "JS"],
+        exploreTime: "Est. 2 min explore",
+        likes: 8,
+        media: [] // Auto live preview fallback
     },
     {
         name: "Secret coding language decode and Ecode",
         url: "https://rickdevr.github.io/Secretcoder/",
         category: "Tools",
         description: "Encrypt and decrypt hidden messages using a secure custom secret cipher.",
-        media: [
-            { type: "image", src: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80" }
-        ]
+        tech: ["JavaScript", "Crypto"],
+        exploreTime: "Est. 1 min explore",
+        likes: 15,
+        media: []
     },
     {
-        name: " Test your friends trust level add more",
+        name: "Test your friends trust level",
         url: "https://rickdevr.github.io/Test-trust-level/",
         category: "Projects",
-        description: " In this website you can see the trough level of you and your friend and more other stuff this sea trust level love level",
-        media: [
-            { type: "image", src: "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=800&q=80" }
-        ]
+        description: "In this website you can see the trust level between you and your friend, including love levels and fun features.",
+        tech: ["HTML", "CSS", "JS"],
+        exploreTime: "Est. 2 min explore",
+        likes: 19,
+        media: []
     },
     {
         name: "Satisfying squishy sound",
         url: "https://rickdevr.github.io/squishy/",
         category: "Projects",
         description: "Relaxing interactive audio-visual toy featuring satisfying squishy physics.",
+        tech: ["HTML", "Canvas", "Audio"],
+        exploreTime: "Est. 1 min explore",
+        likes: 24,
         media: [
             { type: "image", src: "Squishy.png" }
         ]
@@ -52,34 +62,63 @@ const projects = [
         url: "https://rickdevr.github.io/Duck-clicker/",
         category: "Games",
         description: "A fun, addictive clicker game featuring lovable ducks, upgrades, and rewards.",
-        media: [
-            { type: "image", src: "https://images.unsplash.com/photo-1555680202-c86f0e12f086?auto=format&fit=crop&w=800&q=80" }
-        ]
+        tech: ["HTML", "JS", "LocalStorage"],
+        exploreTime: "Est. 4 min explore",
+        likes: 31,
+        media: []
     },
     {
         name: "If you wanna learn how to type on keyboard Faster and without looking then this website's for you",
         url: "https://rickdevr.github.io/Learn-keyboard-typing/",
         category: "Tools",
-        description: "This website teaches you how to learn typing without looking on your keyboard faster and easier",
+        description: "This website teaches you how to learn typing without looking on your keyboard faster and easier.",
+        tech: ["HTML", "CSS", "DOM Events"],
+        exploreTime: "Est. 3 min explore",
+        likes: 22,
         media: [
             { type: "image", src: "Key.png" }
         ]
+    },
+    {
+        name: "DJ Bored",
+        url: "https://rickdevr.github.io/DJ-board-today-s-Tuesday/",
+        category: "Tools",
+        description: " Here you could remix Audios by using ADJ board",
+        tech: ["HTML", "JS", "LocalStorage"],
+        exploreTime: "Est. 4 min explore",
+        likes: 31,
+        media: []
     }
 ];
 
 // ==========================================
-// APP LOGIC & RENDERING
+// APP LOGIC & FEATURES IMPLEMENTATION
 // ==========================================
 document.addEventListener("DOMContentLoaded", () => {
     const grid = document.getElementById("projectsGrid");
     const filterBar = document.getElementById("filterBar");
+    const searchInput = document.getElementById("searchInput");
+    const sortSelect = document.getElementById("sortSelect");
+    const statsCounter = document.getElementById("statsCounter");
+    const footerStats = document.getElementById("footerStats");
+    
+    const themeToggle = document.getElementById("themeToggle");
+    const themeIcon = document.getElementById("themeIcon");
+    const surpriseBtn = document.getElementById("surpriseBtn");
+    const exportBtn = document.getElementById("exportBtn");
     
     const modal = document.getElementById("projectModal");
     const modalClose = document.getElementById("modalClose");
     const modalTitle = document.getElementById("modalTitle");
     const modalCategory = document.getElementById("modalCategory");
     const modalDescription = document.getElementById("modalDescription");
+    const modalTechStack = document.getElementById("modalTechStack");
+    const modalExploreTime = document.getElementById("modalExploreTime");
     const modalVisitBtn = document.getElementById("modalVisitBtn");
+    const modalCopyBtn = document.getElementById("modalCopyBtn");
+    const modalLikeBtn = document.getElementById("modalLikeBtn");
+    const likeCountSpan = document.getElementById("likeCount");
+    const liveStatusBadge = document.getElementById("liveStatusBadge");
     
     const mediaSlider = document.getElementById("mediaSlider");
     const sliderDots = document.getElementById("sliderDots");
@@ -89,32 +128,83 @@ document.addEventListener("DOMContentLoaded", () => {
     let currentSlideIndex = 0;
     let currentProjectMedia = [];
     let slideInterval = null;
+    let activeCategory = "All";
+    let searchQuery = "";
+    let currentActiveProject = null;
 
-    // 1. Build Category Filter Buttons
+    // Load saved likes & theme from localStorage if available
+    projects.forEach((p, i) => {
+        const savedLikes = localStorage.getItem(`project_likes_${i}`);
+        if (savedLikes !== null) p.likes = parseInt(savedLikes);
+    });
+
+    // 1. Dark/Light Mode Theme Toggle
+    themeToggle.addEventListener("click", () => {
+        document.body.classList.toggle("light-mode");
+        document.body.classList.toggle("dark-mode");
+        if (document.body.classList.contains("light-mode")) {
+            themeIcon.className = "fa-solid fa-sun";
+        } else {
+            themeIcon.className = "fa-solid fa-moon";
+        }
+    });
+
+    // 2. Build Category Filters
     const categories = ["All", ...new Set(projects.map(p => p.category))];
     filterBar.innerHTML = categories.map(cat => `
         <button class="filter-btn ${cat === 'All' ? 'active' : ''}" data-category="${cat}">${cat}</button>
     `).join("");
 
-    // 2. Render Projects Grid
-    function renderProjects(filter = "All") {
-        const filtered = filter === "All" ? projects : projects.filter(p => p.category === filter);
-        
+    // Update Footer Stats
+    footerStats.textContent = `Total Projects: ${projects.length} | Active Categories: ${categories.length - 1}`;
+
+    // 3. Render Projects Grid
+    function renderProjects() {
+        let filtered = projects.filter(p => {
+            const matchesCat = activeCategory === "All" || p.category === activeCategory;
+            const matchesSearch = p.name.toLowerCase().includes(searchQuery) || p.description.toLowerCase().includes(searchQuery) || p.tech.some(t => t.toLowerCase().includes(searchQuery));
+            return matchesCat && matchesSearch;
+        });
+
+        // Sorting logic
+        if (sortSelect.value === "az") {
+            filtered.sort((a, b) => a.name.localeCompare(b.name));
+        } else if (sortSelect.value === "za") {
+            filtered.sort((a, b) => b.name.localeCompare(a.name));
+        }
+
+        statsCounter.textContent = `Showing ${filtered.length} of ${projects.length} projects`;
+
+        if (filtered.length === 0) {
+            grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 50px;">No matching projects found.</div>`;
+            return;
+        }
+
         grid.innerHTML = filtered.map((project, index) => {
-            const firstMedia = project.media[0] || { type: "image", src: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80" };
-            
             let previewEl = '';
-            if (firstMedia.type === "video") {
-                previewEl = `<video src="${firstMedia.src}" class="card-media-preview" muted autoplay loop playsinline></video>`;
+            if (project.media && project.media.length > 0) {
+                const firstMedia = project.media[0];
+                if (firstMedia.type === "video") {
+                    previewEl = `<video src="${firstMedia.src}" class="card-media-preview" muted autoplay loop playsinline></video>`;
+                } else {
+                    previewEl = `<img src="${firstMedia.src}" alt="${project.name}" class="card-media-preview" loading="lazy">`;
+                }
             } else {
-                previewEl = `<img src="${firstMedia.src}" alt="${project.name}" class="card-media-preview" loading="lazy">`;
+                previewEl = `<iframe src="${project.url}" class="fallback-preview" loading="lazy" tabindex="-1"></iframe>`;
             }
 
+            const techPillsHtml = project.tech ? project.tech.map(t => `<span class="tech-pill">${t}</span>`).join("") : "";
+
             return `
-                <div class="project-card" data-index="${projects.indexOf(project)}" style="animation-delay: ${index * 0.08}s">
-                    ${previewEl}
+                <div class="project-card" data-index="${projects.indexOf(project)}" style="animation-delay: ${index * 0.05}s">
+                    <div class="card-media-wrapper">
+                        ${previewEl}
+                    </div>
                     <div class="card-content">
-                        <span class="card-tag">${project.category}</span>
+                        <div class="card-top-row">
+                            <span class="card-tag">${project.category}</span>
+                            <div class="card-tech-pills">${techPillsHtml}</div>
+                        </div>
                         <h3 class="card-title">${project.name}</h3>
                         <p class="card-desc">${project.description}</p>
                     </div>
@@ -122,7 +212,7 @@ document.addEventListener("DOMContentLoaded", () => {
             `;
         }).join("");
 
-        // Attach Click Listeners to Cards
+        // Click listeners to open modal
         document.querySelectorAll(".project-card").forEach(card => {
             card.addEventListener("click", () => {
                 const projectIndex = card.getAttribute("data-index");
@@ -133,25 +223,76 @@ document.addEventListener("DOMContentLoaded", () => {
 
     renderProjects();
 
-    // Filter Button Click Events
+    // Event Listeners for filters & search
     filterBar.addEventListener("click", (e) => {
         if (e.target.classList.contains("filter-btn")) {
             document.querySelectorAll(".filter-btn").forEach(btn => btn.classList.remove("active"));
             e.target.classList.add("active");
-            renderProjects(e.target.getAttribute("data-category"));
+            activeCategory = e.target.getAttribute("data-category");
+            renderProjects();
         }
     });
 
-    // 3. Modal & Slider Controls
+    searchInput.addEventListener("input", (e) => {
+        searchQuery = e.target.value.toLowerCase().trim();
+        renderProjects();
+    });
+
+    sortSelect.addEventListener("change", renderProjects);
+
+    // 4. Surprise Me Button
+    surpriseBtn.addEventListener("click", () => {
+        const randomIndex = Math.floor(Math.random() * projects.length);
+        openModal(projects[randomIndex]);
+    });
+
+    // 5. Export JSON Button
+    exportBtn.addEventListener("click", () => {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(projects, null, 2));
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", "portfolio_projects.json");
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+    });
+
+    // 6. Keyboard Shortcuts (Ctrl + K for search, Esc to close)
+    document.addEventListener("keydown", (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            searchInput.focus();
+        }
+        if (e.key === "Escape") closeModal();
+        if (modal.classList.contains("active")) {
+            if (e.key === "ArrowRight") { nextSlide(); resetAutoSlide(); }
+            if (e.key === "ArrowLeft") { prevSlide(); resetAutoSlide(); }
+        }
+    });
+
+    // 7. Modal & Slider Controls
     function openModal(project) {
+        currentActiveProject = project;
         modalTitle.textContent = project.name;
         modalCategory.textContent = project.category;
         modalDescription.textContent = project.description;
         modalVisitBtn.href = project.url;
-        
-        currentProjectMedia = project.media;
+        modalExploreTime.innerHTML = `<i class="fa-regular fa-clock"></i> ${project.exploreTime || 'Est. 2 min explore'}`;
+        likeCountSpan.textContent = project.likes;
+
+        // Render tech stack pills inside modal
+        modalTechStack.innerHTML = project.tech ? project.tech.map(t => `<span class="modal-tech-pill">${t}</span>`).join("") : "";
+
+        // Check live status ping simulation
+        liveStatusBadge.innerHTML = `<span class="pulse-dot"></span> Online & Active`;
+
+        if (project.media && project.media.length > 0) {
+            currentProjectMedia = project.media;
+        } else {
+            currentProjectMedia = [{ type: "iframe", src: project.url }];
+        }
+
         currentSlideIndex = 0;
-        
         updateSlider();
         startAutoSlide();
         
@@ -169,8 +310,26 @@ document.addEventListener("DOMContentLoaded", () => {
     modal.addEventListener("click", (e) => {
         if (e.target === modal) closeModal();
     });
-    document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") closeModal();
+
+    // Copy Link Action
+    modalCopyBtn.addEventListener("click", () => {
+        navigator.clipboard.writeText(modalVisitBtn.href);
+        const originalText = modalCopyBtn.innerHTML;
+        modalCopyBtn.innerHTML = `<i class="fa-solid fa-check"></i> Copied!`;
+        setTimeout(() => { modalCopyBtn.innerHTML = originalText; }, 2000);
+    });
+
+    // Like Button Action
+    modalLikeBtn.addEventListener("click", () => {
+        if (currentActiveProject) {
+            currentActiveProject.likes++;
+            likeCountSpan.textContent = currentActiveProject.likes;
+            const originalIndex = projects.indexOf(currentActiveProject);
+            localStorage.setItem(`project_likes_${originalIndex}`, currentActiveProject.likes);
+            
+            modalLikeBtn.style.transform = "scale(1.15)";
+            setTimeout(() => { modalLikeBtn.style.transform = "scale(1)"; }, 200);
+        }
     });
 
     function updateSlider() {
@@ -178,6 +337,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const isActive = i === currentSlideIndex ? "active" : "";
             if (media.type === "video") {
                 return `<div class="slide-item ${isActive}"><video src="${media.src}" autoplay loop muted playsinline></video></div>`;
+            } else if (media.type === "iframe") {
+                return `<div class="slide-item ${isActive}"><iframe src="${media.src}" style="width:100%;height:100%;border:none;"></iframe></div>`;
             } else {
                 return `<div class="slide-item ${isActive}"><img src="${media.src}" alt="Project preview"></div>`;
             }
@@ -187,7 +348,6 @@ document.addEventListener("DOMContentLoaded", () => {
             <span class="dot ${i === currentSlideIndex ? 'active' : ''}" data-slide="${i}"></span>
         `).join("");
 
-        // Dot clicks
         document.querySelectorAll(".dot").forEach(dot => {
             dot.addEventListener("click", () => {
                 currentSlideIndex = parseInt(dot.getAttribute("data-slide"));
@@ -219,7 +379,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function startAutoSlide() {
         if (currentProjectMedia.length > 1) {
-            slideInterval = setInterval(nextSlide, 4000);
+            slideInterval = setInterval(nextSlide, 4500);
         }
     }
 
