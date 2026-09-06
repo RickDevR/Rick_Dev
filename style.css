@@ -336,6 +336,15 @@ body.light-mode .bg-glow { opacity: 0.5; }
     border: 1px solid rgba(99, 102, 241, 0.2);
 }
 
+.card-bottom-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+    padding-top: 12px;
+    border-top: 1px solid var(--card-border);
+}
+
 .card-tech-pills {
     display: flex;
     gap: 6px;
@@ -348,6 +357,27 @@ body.light-mode .bg-glow { opacity: 0.5; }
     padding: 3px 8px;
     border-radius: 6px;
     font-weight: 600;
+}
+
+.card-like-btn {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--card-border);
+    color: var(--text-main);
+    padding: 6px 12px;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: var(--transition);
+}
+
+.card-like-btn:hover, .card-like-btn.liked {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.4);
+    color: #f43f5e;
 }
 
 .card-title {
@@ -376,19 +406,6 @@ body.light-mode .bg-glow { opacity: 0.5; }
     font-weight: 500;
     border-top: 1px solid var(--card-border);
     padding-top: 25px;
-}
-
-.admin-hint {
-    margin-top: 8px;
-    font-size: 0.8rem;
-    opacity: 0.7;
-}
-
-.admin-hint kbd {
-    background: rgba(255,255,255,0.1);
-    padding: 2px 6px;
-    border-radius: 4px;
-    border: 1px solid rgba(255,255,255,0.2);
 }
 
 /* Modals */

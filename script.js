@@ -1,7 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getDatabase, ref, set, push, get, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-// Firebase Configuration
 const firebaseConfig = {
     apiKey: "AIzaSyAIRH-6mmznVMfGIegHF7ckQXq30MFDDBw",
     authDomain: "hockey-840dd.firebaseapp.com",
@@ -16,7 +15,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// Default Fallback Projects (Used if Firebase is empty)
 const defaultProjects = [
     {
         name: "Yitz Pitz Cast",
@@ -25,7 +23,7 @@ const defaultProjects = [
         description: "Catch up on episodes and audio content and listen to the latest streams.",
         tech: ["HTML", "CSS", "JS", "Audio API"],
         exploreTime: "Est. 3 min explore",
-        likes: 12,
+        likes: 0,
         media: [
             { type: "video", src: "POS.mp4" },
             { type: "video", src: "yitz-preview.mp4" }
@@ -38,7 +36,7 @@ const defaultProjects = [
         description: "Test your speed and complete interactive mini-challenges under tight time limits.",
         tech: ["HTML", "Tailwind", "JS"],
         exploreTime: "Est. 2 min explore",
-        likes: 8,
+        likes: 0,
         media: []
     },
     {
@@ -48,7 +46,7 @@ const defaultProjects = [
         description: "Encrypt and decrypt hidden messages using a secure custom secret cipher.",
         tech: ["JavaScript", "Crypto"],
         exploreTime: "Est. 1 min explore",
-        likes: 15,
+        likes: 0,
         media: []
     },
     {
@@ -58,7 +56,7 @@ const defaultProjects = [
         description: "In this website you can see the trust level between you and your friend, including love levels and fun features.",
         tech: ["HTML", "CSS", "JS"],
         exploreTime: "Est. 2 min explore",
-        likes: 19,
+        likes: 0,
         media: []
     },
     {
@@ -68,7 +66,7 @@ const defaultProjects = [
         description: "Relaxing interactive audio-visual toy featuring satisfying squishy physics.",
         tech: ["HTML", "Canvas", "Audio"],
         exploreTime: "Est. 1 min explore",
-        likes: 24,
+        likes: 0,
         media: [
             { type: "image", src: "Squishy.png" }
         ]
@@ -80,7 +78,7 @@ const defaultProjects = [
         description: "A fun, addictive clicker game featuring lovable ducks, upgrades, and rewards.",
         tech: ["HTML", "JS", "LocalStorage"],
         exploreTime: "Est. 4 min explore",
-        likes: 31,
+        likes: 0,
         media: []
     },
     {
@@ -90,7 +88,7 @@ const defaultProjects = [
         description: "This website teaches you how to learn typing without looking on your keyboard faster and easier.",
         tech: ["HTML", "CSS", "DOM Events"],
         exploreTime: "Est. 3 min explore",
-        likes: 22,
+        likes: 0,
         media: [
             { type: "image", src: "Key.png" }
         ]
@@ -102,7 +100,7 @@ const defaultProjects = [
         description: "Here you could remix Audios by using a DJ board.",
         tech: ["HTML", "JS", "Audio"],
         exploreTime: "Est. 4 min explore",
-        likes: 31,
+        likes: 0,
         media: []
     }
 ];
@@ -140,13 +138,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const prevSlideBtn = document.getElementById("prevSlide");
     const nextSlideBtn = document.getElementById("nextSlide");
 
-    // Feedback Modals
     const feedbackModal = document.getElementById("feedbackModal");
     const openFeedbackBtn = document.getElementById("openFeedbackBtn");
     const feedbackClose = document.getElementById("feedbackClose");
     const feedbackForm = document.getElementById("feedbackForm");
 
-    // Admin CMS Modals & Screens
     const adminModal = document.getElementById("adminModal");
     const adminClose = document.getElementById("adminClose");
     const adminLoginScreen = document.getElementById("adminLoginScreen");
@@ -176,14 +172,13 @@ document.addEventListener("DOMContentLoaded", () => {
     let currentActiveProject = null;
     let allFeedbackEntries = [];
 
-    // --- LOAD PROJECTS FROM FIREBASE REALTIME DATABASE ---
+    // --- LOAD PROJECTS FROM FIREBASE & SYNC LIKES ---
     const projectsRef = ref(db, "portfolio_projects");
     onValue(projectsRef, (snapshot) => {
         const data = snapshot.val();
         if (data) {
             projects = Object.keys(data).map(key => ({ dbKey: key, ...data[key] }));
         } else {
-            // Seed initial default projects if database is empty
             defaultProjects.forEach(p => {
                 const newRef = push(projectsRef);
                 set(newRef, p);
@@ -194,7 +189,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     function initApp() {
-        // Build categories
         const categories = ["All", ...new Set(projects.map(p => p.category))];
         filterBar.innerHTML = categories.map(cat => `
             <button class="filter-btn ${cat === activeCategory ? 'active' : ''}" data-category="${cat}">${cat}</button>
@@ -223,7 +217,6 @@ document.addEventListener("DOMContentLoaded", () => {
         document.body.style.overflow = "auto";
     });
 
-    // --- SUBMIT FEEDBACK ---
     feedbackForm.addEventListener("submit", (e) => {
         e.preventDefault();
         const category = document.getElementById("feedbackCategory").value;
@@ -247,7 +240,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // --- ADMIN CMS PANEL TRIGGER (F2 -> 2285) ---
+    // --- HIDDEN ADMIN CMS PANEL (F2 -> 2285) ---
     document.addEventListener("keydown", (e) => {
         if (e.key === "F2") {
             e.preventDefault();
@@ -293,7 +286,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Hub Navigation
     gotoFeedbackHub.addEventListener("click", () => {
         adminHubScreen.style.display = "none";
         adminFeedbackScreen.style.display = "block";
@@ -317,7 +309,6 @@ document.addEventListener("DOMContentLoaded", () => {
         addWebsiteFormWrapper.style.display = "none";
     });
 
-    // --- FEEDBACK MANAGEMENT & DELETION ---
     function loadAdminFeedback() {
         const feedbackRef = ref(db, "feedback_submissions");
         onValue(feedbackRef, (snapshot) => {
@@ -356,9 +347,8 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
         `).join("");
 
-        // Attach delete triggers
         document.querySelectorAll(".delete-btn[data-feedback-id]").forEach(btn => {
-            btn.addEventListener("click", (e) => {
+            btn.addEventListener("click", () => {
                 const id = btn.getAttribute("data-feedback-id");
                 if (confirm("Are you sure you want to delete this feedback item?")) {
                     remove(ref(db, `feedback_submissions/${id}`)).then(() => {
@@ -377,7 +367,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // --- WEBSITE CMS: ADD & DELETE WEBSITES ---
     openAddWebsiteBtn.addEventListener("click", () => {
         addWebsiteFormWrapper.style.display = "block";
         document.getElementById("newWebName").focus();
@@ -412,7 +401,7 @@ document.addEventListener("DOMContentLoaded", () => {
             description,
             tech,
             exploreTime: "Est. 2 min explore",
-            likes: 1,
+            likes: 0,
             media
         };
 
@@ -458,14 +447,12 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Theme Toggle
     themeToggle.addEventListener("click", () => {
         document.body.classList.toggle("light-mode");
         document.body.classList.toggle("dark-mode");
         themeIcon.className = document.body.classList.contains("light-mode") ? "fa-solid fa-sun" : "fa-solid fa-moon";
     });
 
-    // Filtering & Searching
     filterBar.addEventListener("click", (e) => {
         if (e.target.classList.contains("filter-btn")) {
             document.querySelectorAll(".filter-btn").forEach(btn => btn.classList.remove("active"));
@@ -518,7 +505,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        grid.innerHTML = filtered.map((project, index) => {
+        grid.innerHTML = filtered.map((project) => {
             let previewEl = '';
             if (project.media && project.media.length > 0) {
                 const firstMedia = project.media[0];
@@ -532,10 +519,11 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             const techPillsHtml = project.tech ? project.tech.map(t => `<span class="tech-pill">${t}</span>`).join("") : "";
+            const hasLiked = localStorage.getItem(`liked_${project.dbKey}`) === "true";
 
             return `
-                <div class="project-card" data-index="${projects.indexOf(project)}" style="animation-delay: ${index * 0.05}s">
-                    <div class="card-media-wrapper">
+                <div class="project-card" data-index="${projects.indexOf(project)}">
+                    <div class="card-media-wrapper card-click-trigger" data-index="${projects.indexOf(project)}">
                         ${previewEl}
                     </div>
                     <div class="card-content">
@@ -543,17 +531,50 @@ document.addEventListener("DOMContentLoaded", () => {
                             <span class="card-tag">${project.category}</span>
                             <div class="card-tech-pills">${techPillsHtml}</div>
                         </div>
-                        <h3 class="card-title">${project.name}</h3>
+                        <h3 class="card-title card-click-trigger" data-index="${projects.indexOf(project)}">${project.name}</h3>
                         <p class="card-desc">${project.description}</p>
+                        
+                        <div class="card-bottom-row">
+                            <button class="card-like-btn ${hasLiked ? 'liked' : ''}" data-project-key="${project.dbKey}">
+                                <i class="fa-solid fa-heart"></i> <span class="card-like-count">${project.likes || 0}</span>
+                            </button>
+                            <span style="font-size:0.8rem; color:var(--text-muted);">Click card to view</span>
+                        </div>
                     </div>
                 </div>
             `;
         }).join("");
 
-        document.querySelectorAll(".project-card").forEach(card => {
-            card.addEventListener("click", () => {
-                const projectIndex = card.getAttribute("data-index");
+        // Card click listeners
+        document.querySelectorAll(".card-click-trigger").forEach(el => {
+            el.addEventListener("click", () => {
+                const projectIndex = el.getAttribute("data-index");
                 openModal(projects[projectIndex]);
+            });
+        });
+
+        // Card Like Button Listeners (One-time only per browser)
+        document.querySelectorAll(".card-like-btn").forEach(btn => {
+            btn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                const dbKey = btn.getAttribute("data-project-key");
+                const targetProj = projects.find(p => p.dbKey === dbKey);
+
+                if (localStorage.getItem(`liked_${dbKey}`) === "true") {
+                    alert("You have already liked this website!");
+                    return;
+                }
+
+                if (targetProj) {
+                    targetProj.likes = (targetProj.likes || 0) + 1;
+                    localStorage.setItem(`liked_${dbKey}`, "true");
+                    
+                    const projRef = ref(db, `portfolio_projects/${dbKey}/likes`);
+                    set(projRef, targetProj.likes);
+
+                    btn.classList.add("liked");
+                    btn.querySelector(".card-like-count").textContent = targetProj.likes;
+                }
             });
         });
     }
@@ -566,6 +587,13 @@ document.addEventListener("DOMContentLoaded", () => {
         modalVisitBtn.href = project.url;
         modalExploreTime.innerHTML = `<i class="fa-regular fa-clock"></i> ${project.exploreTime || 'Est. 2 min explore'}`;
         likeCountSpan.textContent = project.likes || 0;
+
+        const hasLiked = localStorage.getItem(`liked_${project.dbKey}`) === "true";
+        if (hasLiked) {
+            modalLikeBtn.classList.add("liked");
+        } else {
+            modalLikeBtn.classList.remove("liked");
+        }
 
         modalTechStack.innerHTML = project.tech ? project.tech.map(t => `<span class="modal-tech-pill">${t}</span>`).join("") : "";
         liveStatusBadge.innerHTML = `<span class="pulse-dot"></span> Online & Active`;
@@ -606,11 +634,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     modalLikeBtn.addEventListener("click", () => {
         if (currentActiveProject && currentActiveProject.dbKey) {
+            const dbKey = currentActiveProject.dbKey;
+            if (localStorage.getItem(`liked_${dbKey}`) === "true") {
+                alert("You have already liked this website!");
+                return;
+            }
+
             currentActiveProject.likes = (currentActiveProject.likes || 0) + 1;
             likeCountSpan.textContent = currentActiveProject.likes;
+            localStorage.setItem(`liked_${dbKey}`, "true");
+            modalLikeBtn.classList.add("liked");
             
-            // Update likes in Firebase Realtime Database
-            const projRef = ref(db, `portfolio_projects/${currentActiveProject.dbKey}/likes`);
+            const projRef = ref(db, `portfolio_projects/${dbKey}/likes`);
             set(projRef, currentActiveProject.likes);
 
             modalLikeBtn.style.transform = "scale(1.15)";
