@@ -105,9 +105,40 @@
                         <button class="btn-like" id="modalLikeBtn">
                             <i class="fa-solid fa-heart"></i> <span id="likeCount">0</span>
                         </button>
+                        <button class="btn-dislike" id="modalDislikeBtn">
+                            <i class="fa-solid fa-thumbs-down"></i> <span id="dislikeCount">0</span>
+                        </button>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Dislike Reason Modal -->
+    <div class="modal-overlay" id="dislikeReasonModal">
+        <div class="modal-content feedback-modal-box">
+            <button class="modal-close" id="dislikeReasonClose"><i class="fa-solid fa-xmark"></i></button>
+            <div class="feedback-header">
+                <i class="fa-solid fa-triangle-exclamation feedback-icon" style="color:#ef4444; background:rgba(239,68,68,0.15);"></i>
+                <h2>Help Us Improve</h2>
+                <p>Please let us know why you are disliking this project:</p>
+            </div>
+            <form id="dislikeReasonForm">
+                <div class="form-group">
+                    <select id="dislikeReasonSelect" class="sort-select" style="width:100%; border-radius: 12px; margin-top:5px;">
+                        <option value="Bug / Error">🐛 Bug or Error Encountered</option>
+                        <option value="Slow Loading">⚡ Slow Loading / Performance</option>
+                        <option value="Hard to Use">🧩 Confusing UI / Hard to Use</option>
+                        <option value="Other">📝 Other Reason (Specify below)</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-top: 15px;">
+                    <textarea id="dislikeReasonText" rows="3" placeholder="Additional details (optional)..." style="width:100%; background:var(--card-bg); border:1px solid var(--card-border); padding:12px 18px; border-radius:12px; color:var(--text-main); outline:none; resize:vertical; font-family:inherit;"></textarea>
+                </div>
+                <button type="submit" class="btn-primary" style="width:100%; margin-top: 20px; background:linear-gradient(135deg, #ef4444, #f97316);">
+                    <i class="fa-solid fa-paper-plane"></i> Submit Dislike
+                </button>
+            </form>
         </div>
     </div>
 
@@ -176,10 +207,15 @@
                         <h3>Manage Feedback & Ideas</h3>
                         <p>View user submissions, read app ideas, and delete outdated entries.</p>
                     </div>
+                    <div class="hub-card" id="gotoDislikesHub">
+                        <i class="fa-solid fa-thumbs-down"></i>
+                        <h3>Review Dislikes & Reasons</h3>
+                        <p>Inspect user feedback on why projects received negative ratings.</p>
+                    </div>
                     <div class="hub-card" id="gotoWebsitesHub">
                         <i class="fa-solid fa-globe"></i>
                         <h3>Manage & Add Websites</h3>
-                        <p>Add new portfolio links, upload media references, and delete old projects.</p>
+                        <p>Add new portfolio links, upload media files from computer, and delete old projects.</p>
                     </div>
                 </div>
             </div>
@@ -202,6 +238,18 @@
                 <div class="admin-entries-list" id="adminEntriesList"></div>
             </div>
 
+            <!-- Section 1.5: Dislikes Manager -->
+            <div id="adminDislikesScreen" class="admin-screen" style="display:none;">
+                <div class="admin-dash-header">
+                    <div>
+                        <button class="back-hub-btn" id="backToHubFromDislikes"><i class="fa-solid fa-arrow-left"></i> Hub Menu</button>
+                        <h2 style="margin-top:8px;">👎 User Dislike Reports</h2>
+                    </div>
+                    <span class="admin-badge">Reason Logs Active</span>
+                </div>
+                <div class="admin-entries-list" id="adminDislikesList"></div>
+            </div>
+
             <!-- Section 2: Website CMS Manager -->
             <div id="adminWebsitesScreen" class="admin-screen" style="display:none;">
                 <div class="admin-dash-header">
@@ -209,12 +257,15 @@
                         <button class="back-hub-btn" id="backToHubFromWebsites"><i class="fa-solid fa-arrow-left"></i> Hub Menu</button>
                         <h2 style="margin-top:8px;">🌐 Portfolio Websites CMS</h2>
                     </div>
-                    <button class="btn-primary" id="openAddWebsiteBtn" style="padding:8px 16px; font-size:0.9rem;"><i class="fa-solid fa-plus"></i> Add New Website</button>
+                    <div style="display:flex; gap:10px;">
+                        <button class="btn-primary" id="resetAllLikesBtn" style="padding:8px 14px; font-size:0.85rem; background:linear-gradient(135deg, #ef4444, #dc2626);"><i class="fa-solid fa-rotate-right"></i> Reset All Likes to 0</button>
+                        <button class="btn-primary" id="openAddWebsiteBtn" style="padding:8px 14px; font-size:0.85rem;"><i class="fa-solid fa-plus"></i> Add New Website</button>
+                    </div>
                 </div>
                 
-                <!-- Add Website Form -->
+                <!-- Add Website Form with Computer Uploads -->
                 <div id="addWebsiteFormWrapper" class="add-website-form-box" style="display:none;">
-                    <h3>Add New Portfolio Website</h3>
+                    <h3>Add New Portfolio Website & Upload Media</h3>
                     <form id="addWebsiteForm">
                         <div class="form-row">
                             <div class="form-group" style="flex:1;">
@@ -245,8 +296,8 @@
                                 <input type="text" id="newWebTech" placeholder="HTML, JS, Firebase" class="cms-input">
                             </div>
                             <div class="form-group" style="flex:1;">
-                                <label>Media Filename (Optional)</label>
-                                <input type="text" id="newWebMedia" placeholder="screenshot.png or video.mp4" class="cms-input">
+                                <label>Upload Media File from Computer</label>
+                                <input type="file" id="newWebMediaFile" accept="image/*,video/mp4" class="cms-input" style="padding:8px;">
                             </div>
                         </div>
                         <div style="display:flex; gap:10px; margin-top:18px;">
