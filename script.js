@@ -1,7 +1,23 @@
-// ==========================================
-// CONFIGURATION: ADD OR EDIT YOUR WEBSITES HERE
-// ==========================================
-const projects = [
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getDatabase, ref, set, push, get, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+// Firebase Configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyAIRH-6mmznVMfGIegHF7ckQXq30MFDDBw",
+    authDomain: "hockey-840dd.firebaseapp.com",
+    databaseURL: "https://hockey-840dd-default-rtdb.firebaseio.com",
+    projectId: "hockey-840dd",
+    storageBucket: "hockey-840dd.firebasestorage.app",
+    messagingSenderId: "454222626197",
+    appId: "1:454222626197:web:6df5eea83d3bbae0df0a9c",
+    measurementId: "G-BBNC63SFHZ"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// Default Fallback Projects (Used if Firebase is empty)
+const defaultProjects = [
     {
         name: "Yitz Pitz Cast",
         url: "https://rickdevr.github.io/Yitz-pitz-cast/",
@@ -86,14 +102,13 @@ const projects = [
         description: "Here you could remix Audios by using a DJ board.",
         tech: ["HTML", "JS", "Audio"],
         exploreTime: "Est. 4 min explore",
-        likes: 500000000,
+        likes: 31,
         media: []
     }
 ];
 
-// ==========================================
-// APP LOGIC & FEATURES IMPLEMENTATION
-// ==========================================
+let projects = [];
+
 document.addEventListener("DOMContentLoaded", () => {
     const grid = document.getElementById("projectsGrid");
     const filterBar = document.getElementById("filterBar");
@@ -125,39 +140,368 @@ document.addEventListener("DOMContentLoaded", () => {
     const prevSlideBtn = document.getElementById("prevSlide");
     const nextSlideBtn = document.getElementById("nextSlide");
 
+    // Feedback Modals
+    const feedbackModal = document.getElementById("feedbackModal");
+    const openFeedbackBtn = document.getElementById("openFeedbackBtn");
+    const feedbackClose = document.getElementById("feedbackClose");
+    const feedbackForm = document.getElementById("feedbackForm");
+
+    // Admin CMS Modals & Screens
+    const adminModal = document.getElementById("adminModal");
+    const adminClose = document.getElementById("adminClose");
+    const adminLoginScreen = document.getElementById("adminLoginScreen");
+    const adminHubScreen = document.getElementById("adminHubScreen");
+    const adminFeedbackScreen = document.getElementById("adminFeedbackScreen");
+    const adminWebsitesScreen = document.getElementById("adminWebsitesScreen");
+    const adminPassInput = document.getElementById("adminPassInput");
+    const adminLoginBtn = document.getElementById("adminLoginBtn");
+
+    const gotoFeedbackHub = document.getElementById("gotoFeedbackHub");
+    const gotoWebsitesHub = document.getElementById("gotoWebsitesHub");
+    const backToHubFromFeedback = document.getElementById("backToHubFromFeedback");
+    const backToHubFromWebsites = document.getElementById("backToHubFromWebsites");
+
+    const adminEntriesList = document.getElementById("adminEntriesList");
+    const adminWebsitesList = document.getElementById("adminWebsitesList");
+    const openAddWebsiteBtn = document.getElementById("openAddWebsiteBtn");
+    const addWebsiteFormWrapper = document.getElementById("addWebsiteFormWrapper");
+    const addWebsiteForm = document.getElementById("addWebsiteForm");
+    const cancelAddWebBtn = document.getElementById("cancelAddWebBtn");
+
     let currentSlideIndex = 0;
     let currentProjectMedia = [];
     let slideInterval = null;
     let activeCategory = "All";
     let searchQuery = "";
     let currentActiveProject = null;
+    let allFeedbackEntries = [];
 
-    projects.forEach((p, i) => {
-        const savedLikes = localStorage.getItem(`project_likes_${i}`);
-        if (savedLikes !== null) p.likes = parseInt(savedLikes);
+    // --- LOAD PROJECTS FROM FIREBASE REALTIME DATABASE ---
+    const projectsRef = ref(db, "portfolio_projects");
+    onValue(projectsRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            projects = Object.keys(data).map(key => ({ dbKey: key, ...data[key] }));
+        } else {
+            // Seed initial default projects if database is empty
+            defaultProjects.forEach(p => {
+                const newRef = push(projectsRef);
+                set(newRef, p);
+            });
+            projects = defaultProjects;
+        }
+        initApp();
     });
 
-    themeToggle.addEventListener("click", () => {
-        document.body.classList.toggle("light-mode");
-        document.body.classList.toggle("dark-mode");
-        if (document.body.classList.contains("light-mode")) {
-            themeIcon.className = "fa-solid fa-sun";
-        } else {
-            themeIcon.className = "fa-solid fa-moon";
+    function initApp() {
+        // Build categories
+        const categories = ["All", ...new Set(projects.map(p => p.category))];
+        filterBar.innerHTML = categories.map(cat => `
+            <button class="filter-btn ${cat === activeCategory ? 'active' : ''}" data-category="${cat}">${cat}</button>
+        `).join("");
+
+        footerStats.textContent = `Total Projects: ${projects.length} | Active Categories: ${categories.length - 1}`;
+        renderProjects();
+    }
+
+    // --- FIRST VISIT FEEDBACK POPUP ---
+    if (!localStorage.getItem("hasVisitedBefore")) {
+        setTimeout(() => {
+            feedbackModal.classList.add("active");
+            document.body.style.overflow = "hidden";
+        }, 1200);
+        localStorage.setItem("hasVisitedBefore", "true");
+    }
+
+    openFeedbackBtn.addEventListener("click", () => {
+        feedbackModal.classList.add("active");
+        document.body.style.overflow = "hidden";
+    });
+
+    feedbackClose.addEventListener("click", () => {
+        feedbackModal.classList.remove("active");
+        document.body.style.overflow = "auto";
+    });
+
+    // --- SUBMIT FEEDBACK ---
+    feedbackForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const category = document.getElementById("feedbackCategory").value;
+        const name = document.getElementById("feedbackName").value.trim() || "Anonymous";
+        const message = document.getElementById("feedbackMessage").value.trim();
+
+        const feedbackRef = ref(db, "feedback_submissions");
+        const newEntryRef = push(feedbackRef);
+        set(newEntryRef, {
+            category,
+            name,
+            message,
+            timestamp: new Date().toLocaleString()
+        }).then(() => {
+            alert("Thank you! Your feedback or app idea was submitted successfully.");
+            feedbackForm.reset();
+            feedbackModal.classList.remove("active");
+            document.body.style.overflow = "auto";
+        }).catch((err) => {
+            alert("Error: " + err.message);
+        });
+    });
+
+    // --- ADMIN CMS PANEL TRIGGER (F2 -> 2285) ---
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "F2") {
+            e.preventDefault();
+            adminModal.classList.add("active");
+            document.body.style.overflow = "hidden";
+            adminLoginScreen.style.display = "block";
+            adminHubScreen.style.display = "none";
+            adminFeedbackScreen.style.display = "none";
+            adminWebsitesScreen.style.display = "none";
+            adminPassInput.value = "";
+            adminPassInput.focus();
+        }
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            searchInput.focus();
+        }
+        if (e.key === "Escape") {
+            closeAllModals();
+        }
+        if (modal.classList.contains("active")) {
+            if (e.key === "ArrowRight") { nextSlide(); resetAutoSlide(); }
+            if (e.key === "ArrowLeft") { prevSlide(); resetAutoSlide(); }
         }
     });
 
-    const categories = ["All", ...new Set(projects.map(p => p.category))];
-    filterBar.innerHTML = categories.map(cat => `
-        <button class="filter-btn ${cat === 'All' ? 'active' : ''}" data-category="${cat}">${cat}</button>
-    `).join("");
+    adminClose.addEventListener("click", () => {
+        adminModal.classList.remove("active");
+        document.body.style.overflow = "auto";
+    });
 
-    footerStats.textContent = `Total Projects: ${projects.length} | Active Categories: ${categories.length - 1}`;
+    adminLoginBtn.addEventListener("click", verifyAdminCode);
+    adminPassInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") verifyAdminCode();
+    });
+
+    function verifyAdminCode() {
+        if (adminPassInput.value.trim() === "2285") {
+            adminLoginScreen.style.display = "none";
+            adminHubScreen.style.display = "block";
+        } else {
+            alert("Incorrect Admin Passcode!");
+            adminPassInput.value = "";
+        }
+    }
+
+    // Hub Navigation
+    gotoFeedbackHub.addEventListener("click", () => {
+        adminHubScreen.style.display = "none";
+        adminFeedbackScreen.style.display = "block";
+        loadAdminFeedback();
+    });
+
+    gotoWebsitesHub.addEventListener("click", () => {
+        adminHubScreen.style.display = "none";
+        adminWebsitesScreen.style.display = "block";
+        loadAdminWebsites();
+    });
+
+    backToHubFromFeedback.addEventListener("click", () => {
+        adminFeedbackScreen.style.display = "none";
+        adminHubScreen.style.display = "block";
+    });
+
+    backToHubFromWebsites.addEventListener("click", () => {
+        adminWebsitesScreen.style.display = "none";
+        adminHubScreen.style.display = "block";
+        addWebsiteFormWrapper.style.display = "none";
+    });
+
+    // --- FEEDBACK MANAGEMENT & DELETION ---
+    function loadAdminFeedback() {
+        const feedbackRef = ref(db, "feedback_submissions");
+        onValue(feedbackRef, (snapshot) => {
+            const data = snapshot.val();
+            allFeedbackEntries = [];
+            if (data) {
+                Object.keys(data).forEach(key => {
+                    allFeedbackEntries.push({ id: key, ...data[key] });
+                });
+            }
+            renderAdminFeedbackEntries("All");
+        });
+    }
+
+    function renderAdminFeedbackEntries(filterCat) {
+        const filtered = filterCat === "All" ? allFeedbackEntries : allFeedbackEntries.filter(e => e.category === filterCat);
+        
+        if (filtered.length === 0) {
+            adminEntriesList.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:40px;">No feedback entries found.</div>`;
+            return;
+        }
+
+        adminEntriesList.innerHTML = filtered.reverse().map(entry => `
+            <div class="admin-entry-card">
+                <div class="entry-info">
+                    <div class="entry-top">
+                        <span class="entry-cat">${entry.category}</span>
+                        <span class="entry-date">${entry.timestamp || 'Recent'}</span>
+                    </div>
+                    <div class="entry-user"><i class="fa-solid fa-user-circle"></i> ${entry.name}</div>
+                    <div class="entry-msg">${entry.message}</div>
+                </div>
+                <button class="delete-btn" data-feedback-id="${entry.id}" title="Delete Feedback">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
+            </div>
+        `).join("");
+
+        // Attach delete triggers
+        document.querySelectorAll(".delete-btn[data-feedback-id]").forEach(btn => {
+            btn.addEventListener("click", (e) => {
+                const id = btn.getAttribute("data-feedback-id");
+                if (confirm("Are you sure you want to delete this feedback item?")) {
+                    remove(ref(db, `feedback_submissions/${id}`)).then(() => {
+                        loadAdminFeedback();
+                    });
+                }
+            });
+        });
+    }
+
+    document.querySelectorAll(".admin-filter-tabs .filter-btn").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+            document.querySelectorAll(".admin-filter-tabs .filter-btn").forEach(b => b.classList.remove("active"));
+            e.target.classList.add("active");
+            renderAdminFeedbackEntries(e.target.getAttribute("data-admin-filter"));
+        });
+    });
+
+    // --- WEBSITE CMS: ADD & DELETE WEBSITES ---
+    openAddWebsiteBtn.addEventListener("click", () => {
+        addWebsiteFormWrapper.style.display = "block";
+        document.getElementById("newWebName").focus();
+    });
+
+    cancelAddWebBtn.addEventListener("click", () => {
+        addWebsiteFormWrapper.style.display = "none";
+        addWebsiteForm.reset();
+    });
+
+    addWebsiteForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const name = document.getElementById("newWebName").value.trim();
+        const category = document.getElementById("newWebCategory").value;
+        const url = document.getElementById("newWebUrl").value.trim();
+        const description = document.getElementById("newWebDesc").value.trim();
+        const techInput = document.getElementById("newWebTech").value.trim();
+        const mediaInput = document.getElementById("newWebMedia").value.trim();
+
+        const tech = techInput ? techInput.split(",").map(t => t.trim()) : ["HTML", "JS"];
+        let media = [];
+        if (mediaInput) {
+            const ext = mediaInput.split('.').pop().toLowerCase();
+            const type = (ext === 'mp4' || ext === 'webm') ? 'video' : 'image';
+            media.push({ type, src: mediaInput });
+        }
+
+        const newProject = {
+            name,
+            url,
+            category,
+            description,
+            tech,
+            exploreTime: "Est. 2 min explore",
+            likes: 1,
+            media
+        };
+
+        const projectsRef = ref(db, "portfolio_projects");
+        const newProjRef = push(projectsRef);
+        set(newProjRef, newProject).then(() => {
+            alert("Website added to portfolio database successfully!");
+            addWebsiteForm.reset();
+            addWebsiteFormWrapper.style.display = "none";
+            loadAdminWebsites();
+        }).catch(err => {
+            alert("Error adding website: " + err.message);
+        });
+    });
+
+    function loadAdminWebsites() {
+        adminWebsitesList.innerHTML = projects.map(proj => `
+            <div class="admin-entry-card">
+                <div class="entry-info">
+                    <div class="entry-top">
+                        <span class="entry-cat">${proj.category}</span>
+                        <span class="entry-date">❤️ ${proj.likes || 0} Likes</span>
+                    </div>
+                    <div class="entry-user" style="font-size:1.1rem;">${proj.name}</div>
+                    <div class="entry-msg" style="margin-bottom:6px;"><a href="${proj.url}" target="_blank" style="color:var(--cyan);">${proj.url}</a></div>
+                    <div class="entry-msg">${proj.description}</div>
+                </div>
+                <button class="delete-btn" data-project-key="${proj.dbKey}" title="Delete Website">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
+            </div>
+        `).join("");
+
+        document.querySelectorAll(".delete-btn[data-project-key]").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const key = btn.getAttribute("data-project-key");
+                if (confirm("Are you sure you want to delete this website from your portfolio?")) {
+                    remove(ref(db, `portfolio_projects/${key}`)).then(() => {
+                        loadAdminWebsites();
+                    });
+                }
+            });
+        });
+    }
+
+    // Theme Toggle
+    themeToggle.addEventListener("click", () => {
+        document.body.classList.toggle("light-mode");
+        document.body.classList.toggle("dark-mode");
+        themeIcon.className = document.body.classList.contains("light-mode") ? "fa-solid fa-sun" : "fa-solid fa-moon";
+    });
+
+    // Filtering & Searching
+    filterBar.addEventListener("click", (e) => {
+        if (e.target.classList.contains("filter-btn")) {
+            document.querySelectorAll(".filter-btn").forEach(btn => btn.classList.remove("active"));
+            e.target.classList.add("active");
+            activeCategory = e.target.getAttribute("data-category");
+            renderProjects();
+        }
+    });
+
+    searchInput.addEventListener("input", (e) => {
+        searchQuery = e.target.value.toLowerCase().trim();
+        renderProjects();
+    });
+
+    sortSelect.addEventListener("change", renderProjects);
+
+    surpriseBtn.addEventListener("click", () => {
+        if (projects.length === 0) return;
+        const randomIndex = Math.floor(Math.random() * projects.length);
+        openModal(projects[randomIndex]);
+    });
+
+    exportBtn.addEventListener("click", () => {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(projects, null, 2));
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", "portfolio_projects.json");
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+    });
 
     function renderProjects() {
         let filtered = projects.filter(p => {
             const matchesCat = activeCategory === "All" || p.category === activeCategory;
-            const matchesSearch = p.name.toLowerCase().includes(searchQuery) || p.description.toLowerCase().includes(searchQuery) || p.tech.some(t => t.toLowerCase().includes(searchQuery));
+            const matchesSearch = p.name.toLowerCase().includes(searchQuery) || p.description.toLowerCase().includes(searchQuery) || (p.tech && p.tech.some(t => t.toLowerCase().includes(searchQuery)));
             return matchesCat && matchesSearch;
         });
 
@@ -214,51 +558,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    renderProjects();
-
-    filterBar.addEventListener("click", (e) => {
-        if (e.target.classList.contains("filter-btn")) {
-            document.querySelectorAll(".filter-btn").forEach(btn => btn.classList.remove("active"));
-            e.target.classList.add("active");
-            activeCategory = e.target.getAttribute("data-category");
-            renderProjects();
-        }
-    });
-
-    searchInput.addEventListener("input", (e) => {
-        searchQuery = e.target.value.toLowerCase().trim();
-        renderProjects();
-    });
-
-    sortSelect.addEventListener("change", renderProjects);
-
-    surpriseBtn.addEventListener("click", () => {
-        const randomIndex = Math.floor(Math.random() * projects.length);
-        openModal(projects[randomIndex]);
-    });
-
-    exportBtn.addEventListener("click", () => {
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(projects, null, 2));
-        const downloadAnchor = document.createElement('a');
-        downloadAnchor.setAttribute("href", dataStr);
-        downloadAnchor.setAttribute("download", "portfolio_projects.json");
-        document.body.appendChild(downloadAnchor);
-        downloadAnchor.click();
-        downloadAnchor.remove();
-    });
-
-    document.addEventListener("keydown", (e) => {
-        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-            e.preventDefault();
-            searchInput.focus();
-        }
-        if (e.key === "Escape") closeModal();
-        if (modal.classList.contains("active")) {
-            if (e.key === "ArrowRight") { nextSlide(); resetAutoSlide(); }
-            if (e.key === "ArrowLeft") { prevSlide(); resetAutoSlide(); }
-        }
-    });
-
     function openModal(project) {
         currentActiveProject = project;
         modalTitle.textContent = project.name;
@@ -266,7 +565,7 @@ document.addEventListener("DOMContentLoaded", () => {
         modalDescription.textContent = project.description;
         modalVisitBtn.href = project.url;
         modalExploreTime.innerHTML = `<i class="fa-regular fa-clock"></i> ${project.exploreTime || 'Est. 2 min explore'}`;
-        likeCountSpan.textContent = project.likes;
+        likeCountSpan.textContent = project.likes || 0;
 
         modalTechStack.innerHTML = project.tech ? project.tech.map(t => `<span class="modal-tech-pill">${t}</span>`).join("") : "";
         liveStatusBadge.innerHTML = `<span class="pulse-dot"></span> Online & Active`;
@@ -285,15 +584,17 @@ document.addEventListener("DOMContentLoaded", () => {
         document.body.style.overflow = "hidden";
     }
 
-    function closeModal() {
+    function closeAllModals() {
         modal.classList.remove("active");
+        feedbackModal.classList.remove("active");
+        adminModal.classList.remove("active");
         document.body.style.overflow = "auto";
         stopAutoSlide();
     }
 
-    modalClose.addEventListener("click", closeModal);
+    modalClose.addEventListener("click", closeAllModals);
     modal.addEventListener("click", (e) => {
-        if (e.target === modal) closeModal();
+        if (e.target === modal) closeAllModals();
     });
 
     modalCopyBtn.addEventListener("click", () => {
@@ -304,12 +605,14 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     modalLikeBtn.addEventListener("click", () => {
-        if (currentActiveProject) {
-            currentActiveProject.likes++;
+        if (currentActiveProject && currentActiveProject.dbKey) {
+            currentActiveProject.likes = (currentActiveProject.likes || 0) + 1;
             likeCountSpan.textContent = currentActiveProject.likes;
-            const originalIndex = projects.indexOf(currentActiveProject);
-            localStorage.setItem(`project_likes_${originalIndex}`, currentActiveProject.likes);
             
+            // Update likes in Firebase Realtime Database
+            const projRef = ref(db, `portfolio_projects/${currentActiveProject.dbKey}/likes`);
+            set(projRef, currentActiveProject.likes);
+
             modalLikeBtn.style.transform = "scale(1.15)";
             setTimeout(() => { modalLikeBtn.style.transform = "scale(1)"; }, 200);
         }

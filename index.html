@@ -5,25 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RickDevr | Ultimate Creative Portfolio</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Google Fonts & FontAwesome Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="dark-mode">
 
-    <!-- Animated Background Glow Orbs & Grid -->
     <div class="bg-glow glow-1"></div>
     <div class="bg-glow glow-2"></div>
     <div class="bg-glow glow-3"></div>
     <div class="bg-grid"></div>
 
     <div class="app-container">
-        <!-- Top Utility Bar: Theme Toggle & Surprise Me -->
+        <!-- Top Utility Bar -->
         <div class="top-nav">
             <button class="utility-btn" id="surpriseBtn" title="Surprise Me!">
                 <i class="fa-solid fa-dice"></i> <span>Surprise Me!</span>
             </button>
             <div class="nav-right-actions">
+                <button class="utility-btn feedback-trigger-btn" id="openFeedbackBtn" title="Send App Ideas & Feedback">
+                    <i class="fa-solid fa-comments"></i> <span>Send Feedback</span>
+                </button>
                 <button class="utility-btn" id="exportBtn" title="Download Projects JSON">
                     <i class="fa-solid fa-download"></i> <span>Export JSON</span>
                 </button>
@@ -33,7 +34,6 @@
             </div>
         </div>
 
-        <!-- Header Section -->
         <header class="header">
             <div class="logo-badge animate-pop">
                 <i class="fa-solid fa-bolt-lightning"></i>
@@ -42,7 +42,6 @@
             <h1 class="main-title">Interactive Web Portfolio & Apps</h1>
             <p class="subtitle">Explore custom web applications, games, tools, and creative experiments built with modern frontend architecture.</p>
             
-            <!-- Search, Filters, & Sorting Bar -->
             <div class="controls-bar">
                 <div class="search-box">
                     <i class="fa-solid fa-magnifying-glass"></i>
@@ -62,24 +61,20 @@
             <div class="stats-counter" id="statsCounter">Showing all projects</div>
         </header>
 
-        <!-- Projects Grid -->
-        <main class="projects-grid" id="projectsGrid">
-            <!-- Dynamically populated -->
-        </main>
+        <main class="projects-grid" id="projectsGrid"></main>
 
-        <!-- Footer Stats -->
         <footer class="footer">
-            <p id="footerStats">Total Projects: 8 | Active Categories: 3</p>
+            <p id="footerStats">Total Projects: 0 | Active Categories: 0</p>
+            <p class="admin-hint">💡 Pro-tip: Press <kbd>F2</kbd> (Passcode: 2285) to open CMS Admin Dashboard</p>
         </footer>
     </div>
 
-    <!-- Enhanced Project Detail Modal View -->
+    <!-- Project Detail Modal View -->
     <div class="modal-overlay" id="projectModal">
         <div class="modal-content">
             <button class="modal-close" id="modalClose"><i class="fa-solid fa-xmark"></i></button>
             
             <div class="modal-body">
-                <!-- Media Carousel / Slider Section -->
                 <div class="modal-media-section">
                     <div class="media-slider" id="mediaSlider"></div>
                     <div class="slider-controls" id="sliderControls">
@@ -89,7 +84,6 @@
                     </div>
                 </div>
 
-                <!-- Info & Actions Section -->
                 <div class="modal-info-section">
                     <div class="modal-meta-top">
                         <span class="modal-category" id="modalCategory">Category</span>
@@ -97,7 +91,6 @@
                     </div>
                     <h2 class="modal-title" id="modalTitle">Project Title</h2>
                     
-                    <!-- Tech Stack Tags -->
                     <div class="modal-tech-stack" id="modalTechStack"></div>
 
                     <p class="modal-description" id="modalDescription">Description...</p>
@@ -119,6 +112,156 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <!-- Feedback & App Ideas Modal -->
+    <div class="modal-overlay" id="feedbackModal">
+        <div class="modal-content feedback-modal-box">
+            <button class="modal-close" id="feedbackClose"><i class="fa-solid fa-xmark"></i></button>
+            <div class="feedback-container">
+                <div class="feedback-header">
+                    <i class="fa-solid fa-lightbulb feedback-icon"></i>
+                    <h2>Send App Ideas & Feedback</h2>
+                    <p>Have an idea for a new website or feedback on existing ones? Let me know directly!</p>
+                </div>
+                <form id="feedbackForm">
+                    <div class="form-group">
+                        <label>Select Category</label>
+                        <select id="feedbackCategory" class="sort-select" style="width:100%; border-radius: 12px; margin-top:5px;">
+                            <option value="Website Idea">💡 New Website Idea</option>
+                            <option value="General Feedback">💬 General Feedback</option>
+                            <option value="Bug Report">🐛 Bug Report / Issue</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-top: 15px;">
+                        <label>Your Name / Handle (Optional)</label>
+                        <input type="text" id="feedbackName" placeholder="e.g. Anonymous / Friend" style="width:100%; background:var(--card-bg); border:1px solid var(--card-border); padding:12px 18px; border-radius:12px; color:var(--text-main); margin-top:5px; outline:none;">
+                    </div>
+                    <div class="form-group" style="margin-top: 15px;">
+                        <label>Your Message / Idea</label>
+                        <textarea id="feedbackMessage" rows="4" placeholder="Describe your app idea or feedback here..." required style="width:100%; background:var(--card-bg); border:1px solid var(--card-border); padding:12px 18px; border-radius:12px; color:var(--text-main); margin-top:5px; outline:none; resize:vertical; font-family:inherit;"></textarea>
+                    </div>
+                    <button type="submit" class="btn-primary" style="width:100%; margin-top: 20px;">
+                        <i class="fa-solid fa-paper-plane"></i> Submit Idea / Feedback
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin CMS Dashboard Modal (F2 -> 2285) -->
+    <div class="modal-overlay" id="adminModal">
+        <div class="modal-content admin-modal-box">
+            <button class="modal-close" id="adminClose"><i class="fa-solid fa-xmark"></i></button>
+            
+            <!-- Login Screen -->
+            <div id="adminLoginScreen" class="admin-screen">
+                <i class="fa-solid fa-shield-halved admin-lock-icon"></i>
+                <h2>CMS Admin Authentication</h2>
+                <p>Enter your secure passcode to manage database feedback and websites.</p>
+                <div class="form-group" style="margin-top: 20px;">
+                    <input type="password" id="adminPassInput" placeholder="Enter Passcode..." style="width:100%; background:var(--card-bg); border:1px solid var(--card-border); padding:14px; border-radius:12px; color:var(--text-main); text-align:center; font-size:1.2rem; letter-spacing:4px; outline:none;">
+                </div>
+                <button id="adminLoginBtn" class="btn-primary" style="width:100%; margin-top: 15px;">Unlock Admin CMS</button>
+            </div>
+
+            <!-- Admin Menu Hub -->
+            <div id="adminHubScreen" class="admin-screen" style="display:none;">
+                <div class="admin-dash-header">
+                    <h2><i class="fa-solid fa-gauge-high"></i> Admin Control Hub</h2>
+                    <span class="admin-badge">Connected to Firebase</span>
+                </div>
+                <p style="color:var(--text-muted); margin-bottom:25px; text-align:left;">Choose which database management section you would like to access:</p>
+                
+                <div class="admin-hub-grid">
+                    <div class="hub-card" id="gotoFeedbackHub">
+                        <i class="fa-solid fa-comments"></i>
+                        <h3>Manage Feedback & Ideas</h3>
+                        <p>View user submissions, read app ideas, and delete outdated entries.</p>
+                    </div>
+                    <div class="hub-card" id="gotoWebsitesHub">
+                        <i class="fa-solid fa-globe"></i>
+                        <h3>Manage & Add Websites</h3>
+                        <p>Add new portfolio links, upload media references, and delete old projects.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 1: Feedback Manager -->
+            <div id="adminFeedbackScreen" class="admin-screen" style="display:none;">
+                <div class="admin-dash-header">
+                    <div>
+                        <button class="back-hub-btn" id="backToHubFromFeedback"><i class="fa-solid fa-arrow-left"></i> Hub Menu</button>
+                        <h2 style="margin-top:8px;">💬 User Feedback & Ideas</h2>
+                    </div>
+                    <span class="admin-badge">Database Sync Active</span>
+                </div>
+                <div class="admin-filter-tabs">
+                    <button class="filter-btn active" data-admin-filter="All">All</button>
+                    <button class="filter-btn" data-admin-filter="Website Idea">💡 Ideas</button>
+                    <button class="filter-btn" data-admin-filter="General Feedback">💬 Feedback</button>
+                    <button class="filter-btn" data-admin-filter="Bug Report">🐛 Bugs</button>
+                </div>
+                <div class="admin-entries-list" id="adminEntriesList"></div>
+            </div>
+
+            <!-- Section 2: Website CMS Manager -->
+            <div id="adminWebsitesScreen" class="admin-screen" style="display:none;">
+                <div class="admin-dash-header">
+                    <div>
+                        <button class="back-hub-btn" id="backToHubFromWebsites"><i class="fa-solid fa-arrow-left"></i> Hub Menu</button>
+                        <h2 style="margin-top:8px;">🌐 Portfolio Websites CMS</h2>
+                    </div>
+                    <button class="btn-primary" id="openAddWebsiteBtn" style="padding:8px 16px; font-size:0.9rem;"><i class="fa-solid fa-plus"></i> Add New Website</button>
+                </div>
+                
+                <!-- Add Website Form (Hidden by default, toggles) -->
+                <div id="addWebsiteFormWrapper" class="add-website-form-box" style="display:none;">
+                    <h3>Add New Portfolio Website</h3>
+                    <form id="addWebsiteForm">
+                        <div class="form-row">
+                            <div class="form-group" style="flex:1;">
+                                <label>Website Name</label>
+                                <input type="text" id="newWebName" placeholder="e.g. Awesome Game" required class="cms-input">
+                            </div>
+                            <div class="form-group" style="flex:1;">
+                                <label>Category</label>
+                                <select id="newWebCategory" class="sort-select cms-select" style="width:100%; border-radius:10px;">
+                                    <option value="Games">Games</option>
+                                    <option value="Tools">Tools</option>
+                                    <option value="Entertainment">Entertainment</option>
+                                    <option value="Projects">Projects</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-top:12px;">
+                            <label>Live URL (GitHub Pages link)</label>
+                            <input type="url" id="newWebUrl" placeholder="https://rickdevr.github.io/my-app/" required class="cms-input">
+                        </div>
+                        <div class="form-group" style="margin-top:12px;">
+                            <label>Description</label>
+                            <textarea id="newWebDesc" rows="2" placeholder="Brief overview of what this app does..." required class="cms-input" style="resize:vertical;"></textarea>
+                        </div>
+                        <div class="form-row" style="margin-top:12px;">
+                            <div class="form-group" style="flex:1;">
+                                <label>Tech Stack (comma separated)</label>
+                                <input type="text" id="newWebTech" placeholder="HTML, JS, Firebase" class="cms-input">
+                            </div>
+                            <div class="form-group" style="flex:1;">
+                                <label>Media Filename (Optional)</label>
+                                <input type="text" id="newWebMedia" placeholder="screenshot.png or video.mp4" class="cms-input">
+                            </div>
+                        </div>
+                        <div style="display:flex; gap:10px; margin-top:18px;">
+                            <button type="submit" class="btn-primary" style="flex:1;"><i class="fa-solid fa-floppy-disk"></i> Save to Database</button>
+                            <button type="button" class="btn-secondary" id="cancelAddWebBtn">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="admin-entries-list" id="adminWebsitesList" style="margin-top:15px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="script.js"></script>
 </body>
 </html>
