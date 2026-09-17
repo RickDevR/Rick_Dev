@@ -1,147 +1,58 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getDatabase, ref, set, push, get, onValue, remove, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { getFirestore, collection, doc, setDoc, addDoc, getDocs, onSnapshot, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { defaultProjects } from "./sites.js";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyAIRH-6mmznVMfGIegHF7ckQXq30MFDDBw",
-    authDomain: "hockey-840dd.firebaseapp.com",
-    databaseURL: "https://hockey-840dd-default-rtdb.firebaseio.com",
-    projectId: "hockey-840dd",
-    storageBucket: "hockey-840dd.firebasestorage.app",
-    messagingSenderId: "454222626197",
-    appId: "1:454222626197:web:6df5eea83d3bbae0df0a9c",
-    measurementId: "G-BBNC63SFHZ"
+    apiKey: "AIzaSyCbNcRMkMM5K2w4LM5VhHsRDu70zOGox1E",
+    authDomain: "fake-6825f.firebaseapp.com",
+    projectId: "fake-6825f",
+    storageBucket: "fake-6825f.firebasestorage.app",
+    messagingSenderId: "195741800470",
+    appId: "1:195741800470:web:f508682df45c804fc27d37",
+    measurementId: "G-0F6P507CKM"
 };
 
 const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-
-const defaultProjects = [
-    {
-        name: "Pos System",
-        url: "https://rickdevr.github.io/Pos/",
-        category: "Entertainment",
-        description: "An immersive audio streaming and podcast platform crafted by Rick_Dev, designed to deliver high fidelity audio episodes, seamless stream caching, and a pristine user interface for content enthusiasts seeking state-of-the-art web audio playback.",
-        tech: ["HTML", "CSS", "JS", "Audio API"],
-        exploreTime: "Est. 3 min explore",
-        lastUpdated: "September 14, 2026",
-        version: "v2.5.0",
-        tutorial: "1. Click Launch Application to open the podcast console.\n2. Select your preferred episode from the active playlist.\n3. Adjust volume and enjoy lossless audio streaming.",
-        visits: 0,
-        likes: 0,
-        dislikes: 0,
-        media: []
-    },
-    {
-        name: "Task challenge",
-        url: "https://rickdevr.github.io/Task/",
-        category: "Games",
-        description: "A fast-paced interactive mini-challenge game engineered by Rick_Dev. Test your reflexes and cognitive speed against tight time limits with dynamic scoring, streak counters, and celebratory visual fireworks.",
-        tech: ["HTML", "Tailwind", "JS"],
-        exploreTime: "Est. 2 min explore",
-        lastUpdated: "September 12, 2026",
-        version: "v1.8.2",
-        tutorial: "1. Click Launch Application to start the game challenge.\n2. Complete tasks before the timer countdown reaches zero.\n3. Rack up points to claim top leaderboard ranking.",
-        visits: 0,
-        likes: 0,
-        dislikes: 0,
-        media: []
-    },
-    {
-        name: "Secret coding language decode and Ecode",
-        url: "https://rickdevr.github.io/Secretcoder/",
-        category: "Tools",
-        description: "A high-security cipher encryption and decryption utility built by Rick_Dev. Transform plain text into secure customized hidden cryptographic messages effortlessly with instantaneous real-time translation algorithms.",
-        tech: ["JavaScript", "Crypto"],
-        exploreTime: "Est. 1 min explore",
-        lastUpdated: "September 10, 2026",
-        version: "v3.1.0",
-        tutorial: "1. Enter your plain text into the encoder box.\n2. Select your encryption key parameters.\n3. Copy the secure encoded output instantly.",
-        visits: 0,
-        likes: 0,
-        dislikes: 0,
-        media: []
-    },
-    {
-        name: "Test your friends trust level",
-        url: "https://rickdevr.github.io/Test-trust-level/",
-        category: "Projects",
-        description: "An entertaining compatibility and trust diagnostic web application by Rick_Dev. Evaluate relationship dynamics, calculate bond metrics, and enjoy playful interactive quizzes with friends across shared sessions.",
-        tech: ["HTML", "CSS", "JS"],
-        exploreTime: "Est. 2 min explore",
-        lastUpdated: "September 15, 2026",
-        version: "v2.0.1",
-        tutorial: "1. Launch the trust diagnostic quiz.\n2. Answer the interactive relationship scenarios.\n3. Review your final calculated bond percentage.",
-        visits: 0,
-        likes: 0,
-        dislikes: 0,
-        media: []
-    },
-    {
-        name: "Satisfying squishy sound",
-        url: "https://rickdevr.github.io/squishy/",
-        category: "Projects",
-        description: "A relaxing tactile and auditory sensory toy crafted by Rick_Dev. Experience satisfying physics deformations and soothing sound design optimized for stress relief and mindful digital relaxation.",
-        tech: ["HTML", "Canvas", "Audio"],
-        exploreTime: "Est. 1 min explore",
-        lastUpdated: "September 08, 2026",
-        version: "v1.1.0",
-        tutorial: "1. Click Launch Application.\n2. Tap or drag across the screen to deform the squishy physics object.\n3. Enjoy relaxing tactile sound feedback.",
-        visits: 0,
-        likes: 0,
-        dislikes: 0,
-        media: []
-    },
-    {
-        name: "Duck clicker",
-        url: "https://rickdevr.github.io/Duck-clicker/",
-        category: "Games",
-        description: "An addictive progression clicker game designed by Rick_Dev. Accumulate virtual ducks, unlock powerful automated multipliers, and achieve ultimate supremacy on the live database leaderboard.",
-        tech: ["HTML", "JS", "LocalStorage"],
-        exploreTime: "Est. 4 min explore",
-        lastUpdated: "September 14, 2026",
-        version: "v4.0.0",
-        tutorial: "1. Click the giant virtual duck to earn currency.\n2. Purchase automated farm upgrades in the shop menu.\n3. Check your standing on the database leaderboard.",
-        visits: 0,
-        likes: 0,
-        dislikes: 0,
-        media: []
-    },
-    {
-        name: "If you wanna learn how to type on keyboard Faster and without looking then this website's for you",
-        url: "https://rickdevr.github.io/Learn-keyboard-typing/",
-        category: "Tools",
-        description: "A professional touch-typing mastery academy developed by Rick_Dev. Build muscle memory, eliminate keyboard glancing, and accelerate words-per-minute speed through guided finger drills and live accuracy metrics.",
-        tech: ["HTML", "CSS", "DOM Events"],
-        exploreTime: "Est. 3 min explore",
-        lastUpdated: "September 11, 2026",
-        version: "v2.2.0",
-        tutorial: "1. Open the touch-typing academy.\n2. Follow the on-screen finger positioning guides.\n3. Complete daily practice drills to increase WPM speed.",
-        visits: 0,
-        likes: 0,
-        dislikes: 0,
-        media: []
-    },
-    {
-        name: "DJ Bored",
-        url: "https://rickdevr.github.io/DJ-board-today-s-Tuesday/",
-        category: "Tools",
-        description: "A virtual audio mixing studio and DJ console engineered by Rick_Dev. Mix tracks, trigger custom sound effects, and experiment with real-time digital signal processing loops and professional frequency controls.",
-        tech: ["HTML", "JS", "Audio"],
-        exploreTime: "Est. 4 min explore",
-        lastUpdated: "September 15, 2026",
-        version: "v3.5.0",
-        tutorial: "1. Launch the DJ studio console.\n2. Trigger sample pads and adjust loop filters in real time.\n3. Mix your custom sound effects seamlessly.",
-        visits: 0,
-        likes: 0,
-        dislikes: 0,
-        media: []
-    }
-];
+const db = getFirestore(app);
 
 let projects = [];
+let statsData = {};
+let soundEnabled = true;
+
+// --- FEATURE 4: Futuristic UI Sound Effects (Web Audio API Synthesizer) ---
+function playUiSound(type = 'click') {
+    if (!soundEnabled) return;
+    try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        const now = audioCtx.currentTime;
+        if (type === 'click') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(580, now);
+            osc.frequency.exponentialRampToValueAtTime(880, now + 0.08);
+            gain.gain.setValueAtTime(0.12, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+            osc.start(now);
+            osc.stop(now + 0.08);
+        } else if (type === 'success') {
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(440, now);
+            osc.frequency.setValueAtTime(660, now + 0.08);
+            osc.frequency.setValueAtTime(880, now + 0.16);
+            gain.gain.setValueAtTime(0.15, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+            osc.start(now);
+            osc.stop(now + 0.3);
+        }
+    } catch (e) {}
+}
 
 document.addEventListener("DOMContentLoaded", () => {
-    // --- OPTIONAL ICON & CINEMATIC LOADER ---
+    // Optional Icon Setup
     const possibleIconNames = ["icon.png", "icon.jpg", "icon.jpeg", "icon.webp"];
     let detectedIconUrl = null;
 
@@ -149,21 +60,13 @@ document.addEventListener("DOMContentLoaded", () => {
         for (const name of possibleIconNames) {
             try {
                 const response = await fetch(name, { method: 'HEAD' });
-                if (response.ok) {
-                    detectedIconUrl = name;
-                    break;
-                }
+                if (response.ok) { detectedIconUrl = name; break; }
             } catch (e) {}
         }
-
         if (detectedIconUrl) {
             document.getElementById("dynamicFavicon").href = detectedIconUrl;
-            
-            const iconWrapper = document.getElementById("loaderIconWrapper");
-            iconWrapper.innerHTML = `<img src="${detectedIconUrl}" alt="Rick_Dev Icon">`;
-
-            const badgeSlot = document.getElementById("badgeIconSlot");
-            badgeSlot.innerHTML = `<img src="${detectedIconUrl}" alt="Icon">`;
+            document.getElementById("loaderIconWrapper").innerHTML = `<img src="${detectedIconUrl}" alt="Icon">`;
+            document.getElementById("badgeIconSlot").innerHTML = `<img src="${detectedIconUrl}" alt="Icon">`;
         }
     }
     checkOptionalIcon();
@@ -175,32 +78,27 @@ document.addEventListener("DOMContentLoaded", () => {
     const loaderSubtitle = document.getElementById("loaderSubtitle");
 
     const loadingStages = [
-        { text: "Establishing secure connection to Rick_Dev vault...", progress: 20 },
-        { text: "Fetching website static optical previews & metrics...", progress: 45 },
-        { text: "Syncing Firebase database clusters & visit logs...", progress: 75 },
-        { text: "Finalizing Rick_Dev cinematic portfolio...", progress: 100 }
+        { text: "Loading websites from sites.js...", progress: 25 },
+        { text: "Syncing Firestore stats & collections...", progress: 60 },
+        { text: "Finalizing Rick_Dev experience...", progress: 100 }
     ];
 
     let currentStage = 0;
     let progress = 0;
-
     const loadInterval = setInterval(() => {
-        progress += 2;
+        progress += 4;
         if (progress <= 100) {
             loaderProgressFill.style.width = progress + "%";
             loaderStatusText.textContent = progress + "%";
-
             if (progress >= loadingStages[currentStage].progress && currentStage < loadingStages.length - 1) {
                 currentStage++;
                 loaderSubtitle.textContent = loadingStages[currentStage].text;
             }
         } else {
             clearInterval(loadInterval);
-            setTimeout(() => {
-                loaderOverlay.classList.add("hidden");
-            }, 700);
+            setTimeout(() => { loaderOverlay.classList.add("hidden"); }, 500);
         }
-    }, 40);
+    }, 30);
 
     const grid = document.getElementById("projectsGrid");
     const filterBar = document.getElementById("filterBar");
@@ -213,6 +111,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const themeIcon = document.getElementById("themeIcon");
     const surpriseBtn = document.getElementById("surpriseBtn");
     const exportBtn = document.getElementById("exportBtn");
+    const audioToggleBtn = document.getElementById("audioToggleBtn");
+    const audioIcon = document.getElementById("audioIcon");
+    const favoritesFilterBtn = document.getElementById("favoritesFilterBtn");
+    const favCountBadge = document.getElementById("favCountBadge");
+
+    const spotlightBanner = document.getElementById("spotlightBanner");
+    const spotlightTitle = document.getElementById("spotlightTitle");
+    const spotlightDesc = document.getElementById("spotlightDesc");
+    const spotlightLaunchBtn = document.getElementById("spotlightLaunchBtn");
     
     const modal = document.getElementById("projectModal");
     const modalClose = document.getElementById("modalClose");
@@ -223,6 +130,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const modalExploreTime = document.getElementById("modalExploreTime");
     const modalVisitBtn = document.getElementById("modalVisitBtn");
     const modalCopyBtn = document.getElementById("modalCopyBtn");
+    const modalBookmarkBtn = document.getElementById("modalBookmarkBtn");
+    const bookmarkText = document.getElementById("bookmarkText");
     const modalLikeBtn = document.getElementById("modalLikeBtn");
     const modalDislikeBtn = document.getElementById("modalDislikeBtn");
     const likeCountSpan = document.getElementById("likeCount");
@@ -232,6 +141,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const modalLastUpdated = document.getElementById("modalLastUpdated");
     const modalVersionNotes = document.getElementById("modalVersionNotes");
     const modalTutorialList = document.getElementById("modalTutorialList");
+    const qrcodeContainer = document.getElementById("qrcodeContainer");
+    const qrAppUrlText = document.getElementById("qrAppUrlText");
 
     const modalTabBtns = document.querySelectorAll(".modal-tab-btn");
     const modalTabPanes = document.querySelectorAll(".modal-tab-pane");
@@ -259,6 +170,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const adminClose = document.getElementById("adminClose");
     const adminLoginScreen = document.getElementById("adminLoginScreen");
     const adminHubScreen = document.getElementById("adminHubScreen");
+    const adminAnalyticsScreen = document.getElementById("adminAnalyticsScreen");
     const adminVisitsScreen = document.getElementById("adminVisitsScreen");
     const adminLikesScreen = document.getElementById("adminLikesScreen");
     const adminFeedbackScreen = document.getElementById("adminFeedbackScreen");
@@ -267,28 +179,25 @@ document.addEventListener("DOMContentLoaded", () => {
     const adminPassInput = document.getElementById("adminPassInput");
     const adminLoginBtn = document.getElementById("adminLoginBtn");
 
+    const gotoAnalyticsHub = document.getElementById("gotoAnalyticsHub");
     const gotoVisitsHub = document.getElementById("gotoVisitsHub");
     const gotoLikesHub = document.getElementById("gotoLikesHub");
     const gotoFeedbackHub = document.getElementById("gotoFeedbackHub");
     const gotoDislikesHub = document.getElementById("gotoDislikesHub");
     const gotoWebsitesHub = document.getElementById("gotoWebsitesHub");
+    const backToHubFromAnalytics = document.getElementById("backToHubFromAnalytics");
     const backToHubFromVisits = document.getElementById("backToHubFromVisits");
     const backToHubFromLikes = document.getElementById("backToHubFromLikes");
     const backToHubFromFeedback = document.getElementById("backToHubFromFeedback");
     const backToHubFromDislikes = document.getElementById("backToHubFromDislikes");
     const backToHubFromWebsites = document.getElementById("backToHubFromWebsites");
 
+    const adminAnalyticsList = document.getElementById("adminAnalyticsList");
     const adminVisitsList = document.getElementById("adminVisitsList");
     const adminLikesList = document.getElementById("adminLikesList");
     const adminEntriesList = document.getElementById("adminEntriesList");
     const adminDislikesList = document.getElementById("adminDislikesList");
     const adminWebsitesList = document.getElementById("adminWebsitesList");
-    const openAddWebsiteBtn = document.getElementById("openAddWebsiteBtn");
-    const resetAllLikesBtn = document.getElementById("resetAllLikesBtn");
-    const addWebsiteFormWrapper = document.getElementById("addWebsiteFormWrapper");
-    const addWebsiteForm = document.getElementById("addWebsiteForm");
-    const cancelAddWebBtn = document.getElementById("cancelAddWebBtn");
-    const newWebMediaFile = document.getElementById("newWebMediaFile");
 
     let currentSlideIndex = 0;
     let currentProjectMedia = [];
@@ -296,6 +205,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let activeCategory = "All";
     let searchQuery = "";
     let currentActiveProject = null;
+    let showingFavoritesOnly = false;
     let allFeedbackEntries = [];
     let allDislikeEntries = [];
     let allLikeLogs = [];
@@ -303,35 +213,71 @@ document.addEventListener("DOMContentLoaded", () => {
     let pendingVoteAction = null;
     let pendingVoteProjectKey = null;
 
-    // --- LOAD PROJECTS FROM FIREBASE ---
-    const projectsRef = ref(db, "portfolio_projects");
-    onValue(projectsRef, (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-            projects = Object.keys(data).map(key => ({ dbKey: key, ...data[key] }));
-        } else {
-            defaultProjects.forEach(p => {
-                const newRef = push(projectsRef);
-                set(newRef, p);
-            });
-            projects = defaultProjects;
-        }
-        initApp();
+    // Audio Toggle (Feature 4)
+    audioToggleBtn.addEventListener("click", () => {
+        soundEnabled = !soundEnabled;
+        audioIcon.className = soundEnabled ? "fa-solid fa-volume-high" : "fa-solid fa-volume-xmark";
+        audioToggleBtn.querySelector("span").textContent = soundEnabled ? "Sound: ON" : "Sound: OFF";
+        playUiSound('click');
     });
+
+    // Fetch Live Stats from Firestore
+    const statsCol = collection(db, "project_stats");
+    onSnapshot(statsCol, (snapshot) => {
+        statsData = {};
+        snapshot.forEach(docSnap => {
+            statsData[docSnap.id] = docSnap.data();
+        });
+        mergeProjectsWithStats();
+    });
+
+    function mergeProjectsWithStats() {
+        projects = defaultProjects.map((p, index) => {
+            const key = `proj_${index}`;
+            const remoteStats = statsData[key] || { likes: 0, dislikes: 0, visits: 0 };
+            return {
+                dbKey: key,
+                ...p,
+                likes: remoteStats.likes || 0,
+                dislikes: remoteStats.dislikes || 0,
+                visits: remoteStats.visits || 0
+            };
+        });
+        updateFavoritesBadge();
+        initApp();
+    }
+
+    function updateFavoritesBadge() {
+        let count = 0;
+        projects.forEach(p => {
+            if (localStorage.getItem(`bookmarked_${p.dbKey}`) === "true") count++;
+        });
+        favCountBadge.textContent = count;
+    }
 
     function initApp() {
         const categories = ["All", ...new Set(projects.map(p => p.category))];
         filterBar.innerHTML = categories.map(cat => `
-            <button class="filter-btn ${cat === activeCategory ? 'active' : ''}" data-category="${cat}">${cat}</button>
+            <button class="filter-btn ${cat === activeCategory && !showingFavoritesOnly ? 'active' : ''}" data-category="${cat}">${cat}</button>
         `).join("");
 
         footerStats.textContent = `Total Applications: ${projects.length} | Active Categories: ${categories.length - 1}`;
+        
+        // Setup Featured Spotlight Hero (Feature 5)
+        if (projects.length > 0) {
+            const sortedByLikes = [...projects].sort((a,b) => (b.likes || 0) - (a.likes || 0));
+            const spotlightProj = sortedByLikes[0];
+            spotlightTitle.textContent = spotlightProj.name;
+            spotlightDesc.textContent = spotlightProj.description;
+            spotlightLaunchBtn.onclick = () => { playUiSound('click'); openModal(spotlightProj); };
+        }
+
         renderProjects();
     }
 
-    // Modal Tabs Navigation
     modalTabBtns.forEach(btn => {
         btn.addEventListener("click", () => {
+            playUiSound('click');
             modalTabBtns.forEach(b => b.classList.remove("active"));
             modalTabPanes.forEach(p => p.classList.remove("active"));
             btn.classList.add("active");
@@ -339,7 +285,14 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // --- FIRST VISIT POPUP ---
+    favoritesFilterBtn.addEventListener("click", () => {
+        playUiSound('click');
+        showingFavoritesOnly = !showingFavoritesOnly;
+        favoritesFilterBtn.style.background = showingFavoritesOnly ? "var(--primary)" : "";
+        favoritesFilterBtn.style.color = showingFavoritesOnly ? "white" : "";
+        renderProjects();
+    });
+
     if (!localStorage.getItem("hasVisitedBefore")) {
         setTimeout(() => {
             feedbackModal.classList.add("active");
@@ -348,40 +301,26 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.setItem("hasVisitedBefore", "true");
     }
 
-    openFeedbackBtn.addEventListener("click", () => {
-        feedbackModal.classList.add("active");
-        document.body.style.overflow = "hidden";
-    });
+    openFeedbackBtn.addEventListener("click", () => { playUiSound('click'); feedbackModal.classList.add("active"); document.body.style.overflow = "hidden"; });
+    feedbackClose.addEventListener("click", () => { feedbackModal.classList.remove("active"); document.body.style.overflow = "auto"; });
 
-    feedbackClose.addEventListener("click", () => {
-        feedbackModal.classList.remove("active");
-        document.body.style.overflow = "auto";
-    });
-
-    feedbackForm.addEventListener("submit", (e) => {
+    feedbackForm.addEventListener("submit", async (e) => {
         e.preventDefault();
         const category = document.getElementById("feedbackCategory").value;
         const name = document.getElementById("feedbackName").value.trim() || "Anonymous";
         const message = document.getElementById("feedbackMessage").value.trim();
 
-        const feedbackRef = ref(db, "feedback_submissions");
-        const newEntryRef = push(feedbackRef);
-        set(newEntryRef, {
-            category,
-            name,
-            message,
-            timestamp: new Date().toLocaleString()
-        }).then(() => {
-            alert("Thank you! Your feedback or app idea was submitted successfully to Rick_Dev.");
+        try {
+            await addDoc(collection(db, "feedback_submissions"), { category, name, message, timestamp: new Date().toLocaleString() });
+            playUiSound('success');
+            alert("Thank you! Your feedback or app idea was submitted successfully.");
             feedbackForm.reset();
             feedbackModal.classList.remove("active");
             document.body.style.overflow = "auto";
-        }).catch((err) => {
-            alert("Error: " + err.message);
-        });
+        } catch (err) { alert("Error: " + err.message); }
     });
 
-    // --- SECURE DUAL-LAYER ADMIN PANEL: CTRL + SHIFT + ALT + F2 ---
+    // --- ADMIN PANEL (Ctrl + Shift + Alt + F2) ---
     document.addEventListener("keydown", (e) => {
         if (e.ctrlKey && e.shiftKey && e.altKey && e.key === "F2") {
             e.preventDefault();
@@ -389,6 +328,7 @@ document.addEventListener("DOMContentLoaded", () => {
             document.body.style.overflow = "hidden";
             adminLoginScreen.style.display = "flex";
             adminHubScreen.style.display = "none";
+            adminAnalyticsScreen.style.display = "none";
             adminVisitsScreen.style.display = "none";
             adminLikesScreen.style.display = "none";
             adminFeedbackScreen.style.display = "none";
@@ -397,103 +337,63 @@ document.addEventListener("DOMContentLoaded", () => {
             adminPassInput.value = "";
             adminPassInput.focus();
         }
-        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-            e.preventDefault();
-            searchInput.focus();
-        }
-        if (e.key === "Escape") {
-            closeAllModals();
-        }
-        if (modal.classList.contains("active")) {
-            if (e.key === "ArrowRight") { nextSlide(); resetAutoSlide(); }
-            if (e.key === "ArrowLeft") { prevSlide(); resetAutoSlide(); }
-        }
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); searchInput.focus(); }
+        if (e.key === "Escape") closeAllModals();
     });
 
-    adminClose.addEventListener("click", () => {
-        adminModal.classList.remove("active");
-        document.body.style.overflow = "auto";
-    });
-
+    adminClose.addEventListener("click", () => { adminModal.classList.remove("active"); document.body.style.overflow = "auto"; });
     adminLoginBtn.addEventListener("click", verifyAdminCode);
-    adminPassInput.addEventListener("keypress", (e) => {
-        if (e.key === "Enter") verifyAdminCode();
-    });
+    adminPassInput.addEventListener("keypress", (e) => { if (e.key === "Enter") verifyAdminCode(); });
 
     function verifyAdminCode() {
         if (adminPassInput.value.trim() === "2285") {
+            playUiSound('success');
             adminLoginScreen.style.display = "none";
             adminHubScreen.style.display = "flex";
-        } else {
-            alert("Incorrect Rick_Dev Admin Passcode!");
-            adminPassInput.value = "";
-        }
+        } else { alert("Incorrect Rick_Dev Admin Passcode!"); adminPassInput.value = ""; }
     }
 
-    gotoVisitsHub.addEventListener("click", () => {
-        adminHubScreen.style.display = "none";
-        adminVisitsScreen.style.display = "flex";
-        loadAdminVisits();
-    });
+    gotoAnalyticsHub.addEventListener("click", () => { adminHubScreen.style.display = "none"; adminAnalyticsScreen.style.display = "flex"; loadAdminAnalytics(); });
+    gotoVisitsHub.addEventListener("click", () => { adminHubScreen.style.display = "none"; adminVisitsScreen.style.display = "flex"; loadAdminVisits(); });
+    gotoLikesHub.addEventListener("click", () => { adminHubScreen.style.display = "none"; adminLikesScreen.style.display = "flex"; loadAdminLikes(); });
+    gotoFeedbackHub.addEventListener("click", () => { adminHubScreen.style.display = "none"; adminFeedbackScreen.style.display = "flex"; loadAdminFeedback(); });
+    gotoDislikesHub.addEventListener("click", () => { adminHubScreen.style.display = "none"; adminDislikesScreen.style.display = "flex"; loadAdminDislikes(); });
+    gotoWebsitesHub.addEventListener("click", () => { adminHubScreen.style.display = "none"; adminWebsitesScreen.style.display = "flex"; loadAdminWebsites(); });
 
-    gotoLikesHub.addEventListener("click", () => {
-        adminHubScreen.style.display = "none";
-        adminLikesScreen.style.display = "flex";
-        loadAdminLikes();
-    });
+    backToHubFromAnalytics.addEventListener("click", () => { adminAnalyticsScreen.style.display = "none"; adminHubScreen.style.display = "flex"; });
+    backToHubFromVisits.addEventListener("click", () => { adminVisitsScreen.style.display = "none"; adminHubScreen.style.display = "flex"; });
+    backToHubFromLikes.addEventListener("click", () => { adminLikesScreen.style.display = "none"; adminHubScreen.style.display = "flex"; });
+    backToHubFromFeedback.addEventListener("click", () => { adminFeedbackScreen.style.display = "none"; adminHubScreen.style.display = "flex"; });
+    backToHubFromDislikes.addEventListener("click", () => { adminDislikesScreen.style.display = "none"; adminHubScreen.style.display = "flex"; });
+    backToHubFromWebsites.addEventListener("click", () => { adminWebsitesScreen.style.display = "none"; adminHubScreen.style.display = "flex"; });
 
-    gotoFeedbackHub.addEventListener("click", () => {
-        adminHubScreen.style.display = "none";
-        adminFeedbackScreen.style.display = "flex";
-        loadAdminFeedback();
-    });
+    // Analytics Visualizer (Feature 6)
+    function loadAdminAnalytics() {
+        const totalVisits = projects.reduce((acc, p) => acc + (p.visits || 0), 0) || 1;
+        const totalLikes = projects.reduce((acc, p) => acc + (p.likes || 0), 0) || 1;
 
-    gotoDislikesHub.addEventListener("click", () => {
-        adminHubScreen.style.display = "none";
-        adminDislikesScreen.style.display = "flex";
-        loadAdminDislikes();
-    });
-
-    gotoWebsitesHub.addEventListener("click", () => {
-        adminHubScreen.style.display = "none";
-        adminWebsitesScreen.style.display = "flex";
-        loadAdminWebsites();
-    });
-
-    backToHubFromVisits.addEventListener("click", () => {
-        adminVisitsScreen.style.display = "none";
-        adminHubScreen.style.display = "flex";
-    });
-
-    backToHubFromLikes.addEventListener("click", () => {
-        adminLikesScreen.style.display = "none";
-        adminHubScreen.style.display = "flex";
-    });
-
-    backToHubFromFeedback.addEventListener("click", () => {
-        adminFeedbackScreen.style.display = "none";
-        adminHubScreen.style.display = "flex";
-    });
-
-    backToHubFromDislikes.addEventListener("click", () => {
-        adminDislikesScreen.style.display = "none";
-        adminHubScreen.style.display = "flex";
-    });
-
-    backToHubFromWebsites.addEventListener("click", () => {
-        adminWebsitesScreen.style.display = "none";
-        adminHubScreen.style.display = "flex";
-        addWebsiteFormWrapper.style.display = "none";
-    });
+        adminAnalyticsList.innerHTML = projects.map(proj => {
+            const visitPct = Math.round(((proj.visits || 0) / totalVisits) * 100);
+            const likePct = Math.round(((proj.likes || 0) / totalLikes) * 100);
+            return `
+                <div class="admin-entry-card" style="flex-direction:column; gap:8px;">
+                    <div style="display:flex; justify-content:space-between; width:100%; font-weight:700;">
+                        <span>${proj.name}</span>
+                        <span style="color:var(--cyan); font-size:0.85rem;">${proj.visits || 0} Visits (${visitPct}%) | ❤️ ${proj.likes || 0} Likes (${likePct}%)</span>
+                    </div>
+                    <div style="width:100%; height:8px; background:rgba(255,255,255,0.08); border-radius:10px; overflow:hidden;">
+                        <div style="height:100%; width:${visitPct}%; background:linear-gradient(135deg, var(--primary), var(--accent));"></div>
+                    </div>
+                </div>
+            `;
+        }).join("");
+    }
 
     function loadAdminVisits() {
         adminVisitsList.innerHTML = projects.map(proj => `
             <div class="admin-entry-card">
                 <div class="entry-info">
-                    <div class="entry-top">
-                        <span class="entry-cat" style="background:rgba(56,189,248,0.2); color:#38bdf8;">📊 Traffic Metric</span>
-                        <span class="entry-date">${proj.visits || 0} Total Visits</span>
-                    </div>
+                    <div class="entry-top"><span class="entry-cat" style="background:rgba(56,189,248,0.2); color:#38bdf8;">📊 Traffic</span><span class="entry-date">${proj.visits || 0} Visits</span></div>
                     <div class="entry-user" style="font-size:1.15rem;">${proj.name}</div>
                     <div class="entry-msg"><a href="${proj.url}" target="_blank" style="color:var(--cyan);">${proj.url}</a></div>
                 </div>
@@ -502,92 +402,54 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function loadAdminLikes() {
-        const likesRef = ref(db, "like_logs");
-        onValue(likesRef, (snapshot) => {
-            const data = snapshot.val();
-            allLikeLogs = [];
-            if (data) {
-                Object.keys(data).forEach(key => {
-                    allLikeLogs.push({ id: key, ...data[key] });
-                });
-            }
-
-            if (allLikeLogs.length === 0) {
-                adminLikesList.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:40px;">No like records found yet.</div>`;
-                return;
-            }
-
+        onSnapshot(collection(db, "like_logs"), (snapshot) => {
+            allLikeLogs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+            if (allLikeLogs.length === 0) { adminLikesList.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:40px;">No like records found yet.</div>`; return; }
             adminLikesList.innerHTML = allLikeLogs.reverse().map(log => `
                 <div class="admin-entry-card">
                     <div class="entry-info">
-                        <div class="entry-top">
-                            <span class="entry-cat" style="background:rgba(244,63,94,0.2); color:#f43f5e;">❤️ Liked Project</span>
-                            <span class="entry-date">${log.timestamp || 'Recent'}</span>
-                        </div>
+                        <div class="entry-top"><span class="entry-cat" style="background:rgba(244,63,94,0.2); color:#f43f5e;">❤️ Liked</span><span class="entry-date">${log.timestamp || 'Recent'}</span></div>
                         <div class="entry-user">User: <strong>${log.userName}</strong></div>
                         <div class="entry-msg">Project: <strong>${log.projectName}</strong></div>
                     </div>
-                    <button class="delete-btn" data-like-log-id="${log.id}" title="Remove Record">
-                        <i class="fa-solid fa-trash-can"></i>
-                    </button>
+                    <button class="delete-btn" data-like-log-id="${log.id}"><i class="fa-solid fa-trash-can"></i></button>
                 </div>
             `).join("");
 
             document.querySelectorAll(".delete-btn[data-like-log-id]").forEach(btn => {
-                btn.addEventListener("click", () => {
-                    const id = btn.getAttribute("data-like-log-id");
-                    if (confirm("Delete this like record?")) {
-                        remove(ref(db, `like_logs/${id}`)).then(() => loadAdminLikes());
-                    }
+                btn.addEventListener("click", async () => {
+                    await deleteDoc(doc(db, "like_logs", btn.getAttribute("data-like-log-id")));
+                    loadAdminLikes();
                 });
             });
         });
     }
 
     function loadAdminFeedback() {
-        const feedbackRef = ref(db, "feedback_submissions");
-        onValue(feedbackRef, (snapshot) => {
-            const data = snapshot.val();
-            allFeedbackEntries = [];
-            if (data) {
-                Object.keys(data).forEach(key => {
-                    allFeedbackEntries.push({ id: key, ...data[key] });
-                });
-            }
+        onSnapshot(collection(db, "feedback_submissions"), (snapshot) => {
+            allFeedbackEntries = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
             renderAdminFeedbackEntries("All");
         });
     }
 
     function renderAdminFeedbackEntries(filterCat) {
         const filtered = filterCat === "All" ? allFeedbackEntries : allFeedbackEntries.filter(e => e.category === filterCat);
-        
-        if (filtered.length === 0) {
-            adminEntriesList.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:40px;">No feedback entries found.</div>`;
-            return;
-        }
-
+        if (filtered.length === 0) { adminEntriesList.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:40px;">No feedback entries found.</div>`; return; }
         adminEntriesList.innerHTML = filtered.reverse().map(entry => `
             <div class="admin-entry-card">
                 <div class="entry-info">
-                    <div class="entry-top">
-                        <span class="entry-cat">${entry.category}</span>
-                        <span class="entry-date">${entry.timestamp || 'Recent'}</span>
-                    </div>
+                    <div class="entry-top"><span class="entry-cat">${entry.category}</span><span class="entry-date">${entry.timestamp || 'Recent'}</span></div>
                     <div class="entry-user"><i class="fa-solid fa-user-circle"></i> ${entry.name}</div>
                     <div class="entry-msg">${entry.message}</div>
                 </div>
-                <button class="delete-btn" data-feedback-id="${entry.id}" title="Delete Feedback">
-                    <i class="fa-solid fa-trash-can"></i>
-                </button>
+                <button class="delete-btn" data-feedback-id="${entry.id}"><i class="fa-solid fa-trash-can"></i></button>
             </div>
         `).join("");
 
         document.querySelectorAll(".delete-btn[data-feedback-id]").forEach(btn => {
-            btn.addEventListener("click", () => {
-                const id = btn.getAttribute("data-feedback-id");
-                if (confirm("Delete this feedback item?")) {
-                    remove(ref(db, `feedback_submissions/${id}`)).then(() => loadAdminFeedback());
-                }
+            btn.addEventListener("click", async () => {
+                await deleteDoc(doc(db, "feedback_submissions", btn.getAttribute("data-feedback-id")));
+                loadAdminFeedback();
             });
         });
     }
@@ -601,159 +463,73 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     function loadAdminDislikes() {
-        const dislikesRef = ref(db, "dislike_logs");
-        onValue(dislikesRef, (snapshot) => {
-            const data = snapshot.val();
-            allDislikeEntries = [];
-            if (data) {
-                Object.keys(data).forEach(key => {
-                    allDislikeEntries.push({ id: key, ...data[key] });
-                });
-            }
-
-            if (allDislikeEntries.length === 0) {
-                adminDislikesList.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:40px;">No dislike reports logged.</div>`;
-                return;
-            }
-
+        onSnapshot(collection(db, "dislike_logs"), (snapshot) => {
+            allDislikeEntries = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+            if (allDislikeEntries.length === 0) { adminDislikesList.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:40px;">No dislike reports logged.</div>`; return; }
             adminDislikesList.innerHTML = allDislikeEntries.reverse().map(entry => `
                 <div class="admin-entry-card">
                     <div class="entry-info">
-                        <div class="entry-top">
-                            <span class="entry-cat" style="background:rgba(239,68,68,0.2); color:#ef4444;">👎 Dislike Report</span>
-                            <span class="entry-date">${entry.timestamp || 'Recent'}</span>
-                        </div>
+                        <div class="entry-top"><span class="entry-cat" style="background:rgba(239,68,68,0.2); color:#ef4444;">👎 Dislike</span><span class="entry-date">${entry.timestamp || 'Recent'}</span></div>
                         <div class="entry-user">User: <strong>${entry.userName || 'Anonymous'}</strong> | Project: <strong>${entry.projectName || 'Unknown'}</strong></div>
                         <div class="entry-msg"><strong>Reason:</strong> ${entry.reason}</div>
-                        ${entry.details ? `<div class="entry-msg" style="margin-top:4px;"><em>Details: "${entry.details}"</em></div>` : ''}
                     </div>
-                    <button class="delete-btn" data-dislike-id="${entry.id}" title="Remove Report">
-                        <i class="fa-solid fa-trash-can"></i>
-                    </button>
+                    <button class="delete-btn" data-dislike-id="${entry.id}"><i class="fa-solid fa-trash-can"></i></button>
                 </div>
             `).join("");
 
             document.querySelectorAll(".delete-btn[data-dislike-id]").forEach(btn => {
-                btn.addEventListener("click", () => {
-                    const id = btn.getAttribute("data-dislike-id");
-                    if (confirm("Delete this dislike log?")) {
-                        remove(ref(db, `dislike_logs/${id}`)).then(() => loadAdminDislikes());
-                    }
+                btn.addEventListener("click", async () => {
+                    await deleteDoc(doc(db, "dislike_logs", btn.getAttribute("data-dislike-id")));
+                    loadAdminDislikes();
                 });
             });
-        });
-    }
-
-    // --- RESET ALL STATS MASTER BUTTON ---
-    resetAllLikesBtn.addEventListener("click", () => {
-        if (confirm("Are you sure you want to reset ALL likes, dislikes, and visit metrics to 0 for every website?")) {
-            projects.forEach(proj => {
-                set(ref(db, `portfolio_projects/${proj.dbKey}/likes`), 0);
-                set(ref(db, `portfolio_projects/${proj.dbKey}/dislikes`), 0);
-                set(ref(db, `portfolio_projects/${proj.dbKey}/visits`), 0);
-                localStorage.removeItem(`liked_${proj.dbKey}`);
-                localStorage.removeItem(`disliked_${proj.dbKey}`);
-            });
-            alert("All stats and metrics have been successfully reset to 0 by Rick_Dev!");
-            loadAdminWebsites();
-        }
-    });
-
-    openAddWebsiteBtn.addEventListener("click", () => {
-        addWebsiteFormWrapper.style.display = "block";
-        document.getElementById("newWebName").focus();
-    });
-
-    cancelAddWebBtn.addEventListener("click", () => {
-        addWebsiteFormWrapper.style.display = "none";
-        addWebsiteForm.reset();
-    });
-
-    addWebsiteForm.addEventListener("submit", (e) => {
-        e.preventDefault();
-        const name = document.getElementById("newWebName").value.trim();
-        const category = document.getElementById("newWebCategory").value;
-        const url = document.getElementById("newWebUrl").value.trim();
-        const description = document.getElementById("newWebDesc").value.trim();
-        const techInput = document.getElementById("newWebTech").value.trim();
-
-        const tech = techInput ? techInput.split(",").map(t => t.trim()) : ["HTML", "JS"];
-        let media = [];
-
-        const file = newWebMediaFile.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(uploadEvent) {
-                const base64String = uploadEvent.target.result;
-                const type = file.type.startsWith('video') ? 'video' : 'image';
-                media.push({ type, src: base64String });
-                saveNewProjectToDB(name, url, category, description, tech, media);
-            };
-            reader.readAsDataURL(file);
-        } else {
-            saveNewProjectToDB(name, url, category, description, tech, media);
-        }
-    });
-
-    function saveNewProjectToDB(name, url, category, description, tech, media) {
-        const currentDate = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-        const newProject = {
-            name,
-            url,
-            category,
-            description,
-            tech,
-            exploreTime: "Est. 2 min explore",
-            lastUpdated: currentDate,
-            version: "v1.0.0",
-            tutorial: "1. Launch the application from the portfolio card.\n2. Interact with the core interface features.\n3. Enjoy your experience!",
-            visits: 0,
-            likes: 0,
-            dislikes: 0,
-            media
-        };
-
-        const projectsRef = ref(db, "portfolio_projects");
-        const newProjRef = push(projectsRef);
-        set(newProjRef, newProject).then(() => {
-            alert("New luxury application added to Rick_Dev portfolio successfully!");
-            addWebsiteForm.reset();
-            addWebsiteFormWrapper.style.display = "none";
-            loadAdminWebsites();
-        }).catch(err => {
-            alert("Error: " + err.message);
         });
     }
 
     function loadAdminWebsites() {
         adminWebsitesList.innerHTML = projects.map(proj => `
-            <div class="admin-entry-card">
-                <div class="entry-info">
-                    <div class="entry-top">
-                        <span class="entry-cat">${proj.category}</span>
-                        <span class="entry-date">📊 ${proj.visits || 0} visits | ❤️ ${proj.likes || 0}</span>
-                    </div>
-                    <div class="entry-user" style="font-size:1.1rem;">${proj.name}</div>
+            <div class="admin-entry-card" style="flex-direction:column; gap:10px;">
+                <div class="entry-info" style="width:100%;">
+                    <div class="entry-top"><span class="entry-cat">${proj.category}</span><span class="entry-date">📊 ${proj.visits || 0} visits</span></div>
+                    <div class="entry-user" style="font-size:1.1rem; margin-top:4px;">${proj.name}</div>
                     <div class="entry-msg" style="margin-bottom:6px;"><a href="${proj.url}" target="_blank" style="color:var(--cyan);">${proj.url}</a></div>
-                    <div class="entry-msg">${proj.description}</div>
                 </div>
-                <button class="delete-btn" data-project-key="${proj.dbKey}" title="Delete Website">
-                    <i class="fa-solid fa-trash-can"></i>
-                </button>
+                <div style="display:flex; justify-content:space-between; align-items:center; width:100%; border-top:1px solid var(--card-border); padding-top:10px; gap:10px; flex-wrap:wrap;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <label style="font-size:0.85rem; font-weight:600; color:var(--text-muted);">Edit Likes:</label>
+                        <input type="number" class="cms-input direct-likes-input" data-project-key="${proj.dbKey}" value="${proj.likes || 0}" style="width:80px; padding:6px 10px; margin:0;">
+                    </div>
+                </div>
             </div>
         `).join("");
 
-        document.querySelectorAll(".delete-btn[data-project-key]").forEach(btn => {
-            btn.addEventListener("click", () => {
-                const key = btn.getAttribute("data-project-key");
-                if (confirm("Delete this website from Rick_Dev portfolio?")) {
-                    remove(ref(db, `portfolio_projects/${key}`)).then(() => loadAdminWebsites());
-                }
+        document.querySelectorAll(".direct-likes-input").forEach(input => {
+            input.addEventListener("change", async (e) => {
+                const key = input.getAttribute("data-project-key");
+                const newLikesVal = parseInt(input.value) || 0;
+                await setDoc(doc(db, "project_stats", key), { likes: newLikesVal }, { merge: true });
+                const target = projects.find(p => p.dbKey === key);
+                if (target) target.likes = newLikesVal;
+                renderProjects();
             });
         });
     }
 
+    // Reset All Stats Master Button
+    document.getElementById("resetAllLikesBtn").addEventListener("click", async () => {
+        if (confirm("Are you sure you want to reset ALL likes, dislikes, and visit metrics to 0?")) {
+            for (const proj of projects) {
+                await setDoc(doc(db, "project_stats", proj.dbKey), { likes: 0, dislikes: 0, visits: 0 });
+                localStorage.removeItem(`liked_${proj.dbKey}`);
+                localStorage.removeItem(`disliked_${proj.dbKey}`);
+            }
+            alert("All metrics successfully reset to 0!");
+            loadAdminWebsites();
+        }
+    });
+
     themeToggle.addEventListener("click", () => {
+        playUiSound('click');
         document.body.classList.toggle("light-mode");
         document.body.classList.toggle("dark-mode");
         themeIcon.className = document.body.classList.contains("light-mode") ? "fa-solid fa-sun" : "fa-solid fa-moon";
@@ -761,27 +537,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
     filterBar.addEventListener("click", (e) => {
         if (e.target.classList.contains("filter-btn")) {
+            playUiSound('click');
             document.querySelectorAll(".filter-btn").forEach(btn => btn.classList.remove("active"));
             e.target.classList.add("active");
             activeCategory = e.target.getAttribute("data-category");
+            showingFavoritesOnly = false;
+            favoritesFilterBtn.style.background = "";
+            favoritesFilterBtn.style.color = "";
             renderProjects();
         }
     });
 
-    searchInput.addEventListener("input", (e) => {
-        searchQuery = e.target.value.toLowerCase().trim();
-        renderProjects();
-    });
-
+    searchInput.addEventListener("input", (e) => { searchQuery = e.target.value.toLowerCase().trim(); renderProjects(); });
     sortSelect.addEventListener("change", renderProjects);
 
     surpriseBtn.addEventListener("click", () => {
+        playUiSound('click');
         if (projects.length === 0) return;
-        const randomIndex = Math.floor(Math.random() * projects.length);
-        openModal(projects[randomIndex]);
+        openModal(projects[Math.floor(Math.random() * projects.length)]);
     });
 
     exportBtn.addEventListener("click", () => {
+        playUiSound('click');
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(projects, null, 2));
         const downloadAnchor = document.createElement('a');
         downloadAnchor.setAttribute("href", dataStr);
@@ -793,21 +570,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function renderProjects() {
         let filtered = projects.filter(p => {
+            const matchesFav = !showingFavoritesOnly || localStorage.getItem(`bookmarked_${p.dbKey}`) === "true";
             const matchesCat = activeCategory === "All" || p.category === activeCategory;
             const matchesSearch = p.name.toLowerCase().includes(searchQuery) || p.description.toLowerCase().includes(searchQuery) || (p.tech && p.tech.some(t => t.toLowerCase().includes(searchQuery)));
-            return matchesCat && matchesSearch;
+            return matchesFav && matchesCat && matchesSearch;
         });
 
-        if (sortSelect.value === "az") {
+        const sortVal = sortSelect.value;
+        if (sortVal === "likes" || sortVal === "default") {
+            filtered.sort((a, b) => (b.likes || 0) - (a.likes || 0));
+        } else if (sortVal === "az") {
             filtered.sort((a, b) => a.name.localeCompare(b.name));
-        } else if (sortSelect.value === "za") {
+        } else if (sortVal === "za") {
             filtered.sort((a, b) => b.name.localeCompare(a.name));
         }
 
         statsCounter.textContent = `Showing ${filtered.length} of ${projects.length} luxury applications`;
 
         if (filtered.length === 0) {
-            grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 50px;">No matching luxury applications found.</div>`;
+            grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 50px;">No matching applications found.</div>`;
             return;
         }
 
@@ -828,12 +609,14 @@ document.addEventListener("DOMContentLoaded", () => {
             const techPillsHtml = project.tech ? project.tech.map(t => `<span class="tech-pill">${t}</span>`).join("") : "";
             const hasLiked = localStorage.getItem(`liked_${project.dbKey}`) === "true";
             const hasDisliked = localStorage.getItem(`disliked_${project.dbKey}`) === "true";
+            const isBookmarked = localStorage.getItem(`bookmarked_${project.dbKey}`) === "true";
 
             return `
                 <div class="project-card">
-                    <div class="card-media-wrapper">
-                        ${previewEl}
-                    </div>
+                    <button class="card-bookmark-btn ${isBookmarked ? 'bookmarked' : ''}" data-bookmark-key="${project.dbKey}" title="Save to Favorites">
+                        <i class="fa-solid fa-bookmark"></i>
+                    </button>
+                    <div class="card-media-wrapper">${previewEl}</div>
                     <div class="card-content card-click-trigger" data-index="${projects.indexOf(project)}" style="cursor: pointer;">
                         <div class="card-top-row">
                             <span class="card-tag">${project.category}</span>
@@ -855,11 +638,27 @@ document.addEventListener("DOMContentLoaded", () => {
             `;
         }).join("");
 
-        document.querySelectorAll(".card-click-trigger").forEach(el => {
-            el.addEventListener("click", () => {
-                const projectIndex = el.getAttribute("data-index");
-                openModal(projects[projectIndex]);
+        // Bookmark Toggle on Card (Feature 3)
+        document.querySelectorAll(".card-bookmark-btn").forEach(btn => {
+            btn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                playUiSound('click');
+                const dbKey = btn.getAttribute("data-bookmark-key");
+                const currentStatus = localStorage.getItem(`bookmarked_${dbKey}`) === "true";
+                if (currentStatus) {
+                    localStorage.removeItem(`bookmarked_${dbKey}`);
+                    btn.classList.remove("bookmarked");
+                } else {
+                    localStorage.setItem(`bookmarked_${dbKey}`, "true");
+                    btn.classList.add("bookmarked");
+                }
+                updateFavoritesBadge();
+                if (showingFavoritesOnly) renderProjects();
             });
+        });
+
+        document.querySelectorAll(".card-click-trigger").forEach(el => {
+            el.addEventListener("click", () => { openModal(projects[el.getAttribute("data-index")]); });
         });
 
         // Like Click
@@ -871,18 +670,25 @@ document.addEventListener("DOMContentLoaded", () => {
                 const isLiked = localStorage.getItem(`liked_${dbKey}`) === "true";
 
                 if (isLiked) {
+                    playUiSound('click');
                     targetProj.likes = Math.max(0, (targetProj.likes || 1) - 1);
                     localStorage.removeItem(`liked_${dbKey}`);
                     btn.classList.remove("liked");
-                    set(ref(db, `portfolio_projects/${dbKey}/likes`), targetProj.likes);
+                    setDoc(doc(db, "project_stats", dbKey), { likes: targetProj.likes }, { merge: true });
                     btn.querySelector(".card-like-count").textContent = targetProj.likes;
+                    renderProjects();
                 } else {
-                    pendingVoteAction = 'like';
-                    pendingVoteProjectKey = dbKey;
-                    voterModalTitle.textContent = `Who's Liking "${targetProj.name}"?`;
-                    dislikeSpecificFields.style.display = "none";
-                    voterIdentityModal.classList.add("active");
-                    voterNameInput.focus();
+                    const savedUserName = localStorage.getItem("rick_dev_voter_name");
+                    if (savedUserName) {
+                        executeLikeVote(dbKey, targetProj, savedUserName);
+                    } else {
+                        pendingVoteAction = 'like';
+                        pendingVoteProjectKey = dbKey;
+                        voterModalTitle.textContent = `Who's Liking "${targetProj.name}"?`;
+                        dislikeSpecificFields.style.display = "none";
+                        voterIdentityModal.classList.add("active");
+                        voterNameInput.focus();
+                    }
                 }
             });
         });
@@ -896,24 +702,68 @@ document.addEventListener("DOMContentLoaded", () => {
                 const isDisliked = localStorage.getItem(`disliked_${dbKey}`) === "true";
 
                 if (isDisliked) {
+                    playUiSound('click');
                     targetProj.dislikes = Math.max(0, (targetProj.dislikes || 1) - 1);
                     localStorage.removeItem(`disliked_${dbKey}`);
                     btn.classList.remove("disliked");
-                    set(ref(db, `portfolio_projects/${dbKey}/dislikes`), targetProj.dislikes);
+                    setDoc(doc(db, "project_stats", dbKey), { dislikes: targetProj.dislikes }, { merge: true });
                     btn.querySelector(".card-dislike-count").textContent = targetProj.dislikes;
+                    renderProjects();
                 } else {
-                    pendingVoteAction = 'dislike';
-                    pendingVoteProjectKey = dbKey;
-                    voterModalTitle.textContent = `Feedback on "${targetProj.name}"?`;
-                    dislikeSpecificFields.style.display = "block";
-                    voterIdentityModal.classList.add("active");
-                    voterNameInput.focus();
+                    const savedUserName = localStorage.getItem("rick_dev_voter_name");
+                    if (savedUserName) {
+                        executeDislikeVote(dbKey, targetProj, savedUserName, "Bug / Error", "");
+                    } else {
+                        pendingVoteAction = 'dislike';
+                        pendingVoteProjectKey = dbKey;
+                        voterModalTitle.textContent = `Feedback on "${targetProj.name}"?`;
+                        dislikeSpecificFields.style.display = "block";
+                        voterIdentityModal.classList.add("active");
+                        voterNameInput.focus();
+                    }
                 }
             });
         });
     }
 
-    // Voter Identity Form Submission
+    async function executeLikeVote(dbKey, targetProj, userName) {
+        playUiSound('success');
+        targetProj.likes = (targetProj.likes || 0) + 1;
+        localStorage.setItem(`liked_${dbKey}`, "true");
+        await setDoc(doc(db, "project_stats", dbKey), { likes: targetProj.likes }, { merge: true });
+
+        await addDoc(collection(db, "like_logs"), {
+            projectKey: dbKey, projectName: targetProj.name, userName, timestamp: new Date().toLocaleString()
+        });
+
+        if (localStorage.getItem(`disliked_${dbKey}`) === "true") {
+            targetProj.dislikes = Math.max(0, (targetProj.dislikes || 1) - 1);
+            localStorage.removeItem(`disliked_${dbKey}`);
+            await setDoc(doc(db, "project_stats", dbKey), { dislikes: targetProj.dislikes }, { merge: true });
+        }
+        renderProjects();
+        if (modal.classList.contains("active")) openModal(targetProj);
+    }
+
+    async function executeDislikeVote(dbKey, targetProj, userName, reason, details) {
+        playUiSound('click');
+        targetProj.dislikes = (targetProj.dislikes || 0) + 1;
+        localStorage.setItem(`disliked_${dbKey}`, "true");
+        await setDoc(doc(db, "project_stats", dbKey), { dislikes: targetProj.dislikes }, { merge: true });
+
+        await addDoc(collection(db, "dislike_logs"), {
+            projectKey: dbKey, projectName: targetProj.name, userName, reason, details, timestamp: new Date().toLocaleString()
+        });
+
+        if (localStorage.getItem(`liked_${dbKey}`) === "true") {
+            targetProj.likes = Math.max(0, (targetProj.likes || 1) - 1);
+            localStorage.removeItem(`liked_${dbKey}`);
+            await setDoc(doc(db, "project_stats", dbKey), { likes: targetProj.likes }, { merge: true });
+        }
+        renderProjects();
+        if (modal.classList.contains("active")) openModal(targetProj);
+    }
+
     voterIdentityForm.addEventListener("submit", (e) => {
         e.preventDefault();
         if (!pendingVoteProjectKey || !pendingVoteAction) return;
@@ -922,53 +772,20 @@ document.addEventListener("DOMContentLoaded", () => {
         const targetProj = projects.find(p => p.dbKey === dbKey);
         const userName = voterNameInput.value.trim() || "Anonymous";
 
+        localStorage.setItem("rick_dev_voter_name", userName);
+
         if (pendingVoteAction === 'like') {
-            targetProj.likes = (targetProj.likes || 0) + 1;
-            localStorage.setItem(`liked_${dbKey}`, "true");
-            set(ref(db, `portfolio_projects/${dbKey}/likes`), targetProj.likes);
-
-            push(ref(db, "like_logs"), {
-                projectKey: dbKey,
-                projectName: targetProj.name,
-                userName,
-                timestamp: new Date().toLocaleString()
-            });
-
-            if (localStorage.getItem(`disliked_${dbKey}`) === "true") {
-                targetProj.dislikes = Math.max(0, (targetProj.dislikes || 1) - 1);
-                localStorage.removeItem(`disliked_${dbKey}`);
-                set(ref(db, `portfolio_projects/${dbKey}/dislikes`), targetProj.dislikes);
-            }
+            executeLikeVote(dbKey, targetProj, userName);
         } else if (pendingVoteAction === 'dislike') {
-            targetProj.dislikes = (targetProj.dislikes || 0) + 1;
-            localStorage.setItem(`disliked_${dbKey}`, "true");
-            set(ref(db, `portfolio_projects/${dbKey}/dislikes`), targetProj.dislikes);
-
             const reason = dislikeReasonSelect.value;
             const details = dislikeReasonText.value.trim();
-
-            push(ref(db, "dislike_logs"), {
-                projectKey: dbKey,
-                projectName: targetProj.name,
-                userName,
-                reason,
-                details,
-                timestamp: new Date().toLocaleString()
-            });
-
-            if (localStorage.getItem(`liked_${dbKey}`) === "true") {
-                targetProj.likes = Math.max(0, (targetProj.likes || 1) - 1);
-                localStorage.removeItem(`liked_${dbKey}`);
-                set(ref(db, `portfolio_projects/${dbKey}/likes`), targetProj.likes);
-            }
+            executeDislikeVote(dbKey, targetProj, userName, reason, details);
         }
 
         voterIdentityForm.reset();
         voterIdentityModal.classList.remove("active");
         pendingVoteProjectKey = null;
         pendingVoteAction = null;
-        renderProjects();
-        if (modal.classList.contains("active")) openModal(targetProj);
     });
 
     voterIdentityClose.addEventListener("click", () => {
@@ -978,6 +795,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     function openModal(project) {
+        playUiSound('click');
         currentActiveProject = project;
         modalTitle.textContent = project.name;
         modalCategory.textContent = project.category;
@@ -987,38 +805,40 @@ document.addEventListener("DOMContentLoaded", () => {
         likeCountSpan.textContent = project.likes || 0;
         dislikeCountSpan.textContent = project.dislikes || 0;
         modalVisitsCount.textContent = project.visits || 0;
-        modalLastUpdated.textContent = `Last Updated: ${project.lastUpdated || 'September 15, 2026'} (${project.version || 'v1.0.0'})`;
-        modalVersionNotes.textContent = `Active production build stable on Firebase. All real-time modules operating at peak efficiency.`;
+        modalLastUpdated.textContent = `Last Updated: ${project.lastUpdated || 'September 17, 2026'} (${project.version || 'v1.0.0'})`;
+        modalVersionNotes.textContent = `Active production build stable. All real-time modules operating at peak efficiency.`;
 
-        // Render Tutorial Steps
-        if (project.tutorial) {
-            const steps = project.tutorial.split("\n");
-            modalTutorialList.innerHTML = steps.map((step, idx) => `
+        // Render QR Code (Feature 1)
+        qrcodeContainer.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(project.url)}" alt="App QR Code" style="display:block; border-radius:8px;">`;
+        qrAppUrlText.textContent = project.url;
+
+        // Bookmark Modal Button State
+        const isBookmarked = localStorage.getItem(`bookmarked_${project.dbKey}`) === "true";
+        bookmarkText.textContent = isBookmarked ? "Saved" : "Save";
+        modalBookmarkBtn.style.background = isBookmarked ? "var(--accent)" : "";
+
+        // Render multiple tutorial steps
+        if (project.tutorial && Array.isArray(project.tutorial)) {
+            modalTutorialList.innerHTML = project.tutorial.map((step, idx) => `
                 <div class="tutorial-step">
                     <span class="step-num">${idx + 1}</span>
-                    <p>${step.replace(/^\d+\.\s*/, '')}</p>
+                    <p>${step}</p>
                 </div>
             `).join("");
         } else {
             modalTutorialList.innerHTML = `<div class="tutorial-step"><span class="step-num">1</span><p>Launch application and enjoy the interactive platform.</p></div>`;
         }
 
-        // Increment Visit Count in Firebase Transaction
         if (project.dbKey) {
-            const visitRef = ref(db, `portfolio_projects/${project.dbKey}/visits`);
-            runTransaction(visitRef, (currentVisits) => {
-                return (currentVisits || 0) + 1;
-            });
+            const newVisits = (project.visits || 0) + 1;
+            setDoc(doc(db, "project_stats", project.dbKey), { visits: newVisits }, { merge: true });
         }
 
         const hasLiked = localStorage.getItem(`liked_${project.dbKey}`) === "true";
         const hasDisliked = localStorage.getItem(`disliked_${project.dbKey}`) === "true";
         
-        if (hasLiked) modalLikeBtn.classList.add("liked");
-        else modalLikeBtn.classList.remove("liked");
-
-        if (hasDisliked) modalDislikeBtn.classList.add("disliked");
-        else modalDislikeBtn.classList.remove("disliked");
+        if (hasLiked) modalLikeBtn.classList.add("liked"); else modalLikeBtn.classList.remove("liked");
+        if (hasDisliked) modalDislikeBtn.classList.add("disliked"); else modalDislikeBtn.classList.remove("disliked");
 
         modalTechStack.innerHTML = project.tech ? project.tech.map(t => `<span class="modal-tech-pill">${t}</span>`).join("") : "";
         liveStatusBadge.innerHTML = `<span class="pulse-dot"></span> Online & Active`;
@@ -1038,7 +858,26 @@ document.addEventListener("DOMContentLoaded", () => {
         document.body.style.overflow = "hidden";
     }
 
+    modalBookmarkBtn.addEventListener("click", () => {
+        if (!currentActiveProject) return;
+        playUiSound('click');
+        const dbKey = currentActiveProject.dbKey;
+        const currentStatus = localStorage.getItem(`bookmarked_${dbKey}`) === "true";
+        if (currentStatus) {
+            localStorage.removeItem(`bookmarked_${dbKey}`);
+            bookmarkText.textContent = "Save";
+            modalBookmarkBtn.style.background = "";
+        } else {
+            localStorage.setItem(`bookmarked_${dbKey}`, "true");
+            bookmarkText.textContent = "Saved";
+            modalBookmarkBtn.style.background = "var(--accent)";
+        }
+        updateFavoritesBadge();
+        renderProjects();
+    });
+
     function closeAllModals() {
+        playUiSound('click');
         modal.classList.remove("active");
         feedbackModal.classList.remove("active");
         adminModal.classList.remove("active");
@@ -1048,61 +887,72 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     modalClose.addEventListener("click", closeAllModals);
-    modal.addEventListener("click", (e) => {
-        if (e.target === modal) closeAllModals();
-    });
+    modal.addEventListener("click", (e) => { if (e.target === modal) closeAllModals(); });
 
     modalCopyBtn.addEventListener("click", () => {
+        playUiSound('success');
         navigator.clipboard.writeText(modalVisitBtn.href);
         const originalText = modalCopyBtn.innerHTML;
         modalCopyBtn.innerHTML = `<i class="fa-solid fa-check"></i> Copied!`;
         setTimeout(() => { modalCopyBtn.innerHTML = originalText; }, 2000);
     });
 
-    // Modal Like Toggle
     modalLikeBtn.addEventListener("click", () => {
         if (currentActiveProject && currentActiveProject.dbKey) {
             const dbKey = currentActiveProject.dbKey;
             const isLiked = localStorage.getItem(`liked_${dbKey}`) === "true";
 
             if (isLiked) {
+                playUiSound('click');
                 currentActiveProject.likes = Math.max(0, (currentActiveProject.likes || 1) - 1);
                 localStorage.removeItem(`liked_${dbKey}`);
                 modalLikeBtn.classList.remove("liked");
                 likeCountSpan.textContent = currentActiveProject.likes;
-                set(ref(db, `portfolio_projects/${dbKey}/likes`), currentActiveProject.likes);
+                setDoc(doc(db, "project_stats", dbKey), { likes: currentActiveProject.likes }, { merge: true });
                 renderProjects();
             } else {
-                pendingVoteAction = 'like';
-                pendingVoteProjectKey = dbKey;
-                voterModalTitle.textContent = `Who's Liking "${currentActiveProject.name}"?`;
-                dislikeSpecificFields.style.display = "none";
-                voterIdentityModal.classList.add("active");
-                voterNameInput.focus();
+                const savedUserName = localStorage.getItem("rick_dev_voter_name");
+                if (savedUserName) {
+                    executeLikeVote(dbKey, currentActiveProject, savedUserName);
+                    likeCountSpan.textContent = currentActiveProject.likes;
+                } else {
+                    pendingVoteAction = 'like';
+                    pendingVoteProjectKey = dbKey;
+                    voterModalTitle.textContent = `Who's Liking "${currentActiveProject.name}"?`;
+                    dislikeSpecificFields.style.display = "none";
+                    voterIdentityModal.classList.add("active");
+                    voterNameInput.focus();
+                }
             }
         }
     });
 
-    // Modal Dislike Toggle
     modalDislikeBtn.addEventListener("click", () => {
         if (currentActiveProject && currentActiveProject.dbKey) {
             const dbKey = currentActiveProject.dbKey;
             const isDisliked = localStorage.getItem(`disliked_${dbKey}`) === "true";
 
             if (isDisliked) {
+                playUiSound('click');
                 currentActiveProject.dislikes = Math.max(0, (currentActiveProject.dislikes || 1) - 1);
                 localStorage.removeItem(`disliked_${dbKey}`);
                 modalDislikeBtn.classList.remove("disliked");
                 dislikeCountSpan.textContent = currentActiveProject.dislikes;
-                set(ref(db, `portfolio_projects/${dbKey}/dislikes`), currentActiveProject.dislikes);
+                setDoc(doc(db, "project_stats", dbKey), { dislikes: currentActiveProject.dislikes }, { merge: true });
                 renderProjects();
             } else {
-                pendingVoteAction = 'dislike';
-                pendingVoteProjectKey = dbKey;
-                voterModalTitle.textContent = `Feedback on "${currentActiveProject.name}"?`;
-                dislikeSpecificFields.style.display = "block";
-                voterIdentityModal.classList.add("active");
-                voterNameInput.focus();
+                const savedUserName = localStorage.getItem("rick_dev_voter_name");
+                if (savedUserName) {
+                    executeDislikeVote(dbKey, currentActiveProject, savedUserName, "Bug / Error", "");
+                    dislikeCountSpan.textContent = currentActiveProject.dislikes;
+                } else {
+                    pendingVoteAction = 'dislike';
+                    pendingVoteProjectKey = dbKey;
+                    voterModalTitle.textContent = `Feedback on "${currentActiveProject.name}"?`;
+                    dislikeSpecificFields.style.display = "block";
+                    voterIdentityModal.classList.add("active");
+                    voterNameInput.focus();
+                }
             }
         }
     });
@@ -1123,6 +973,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         document.querySelectorAll(".dot").forEach(dot => {
             dot.addEventListener("click", () => {
+                playUiSound('click');
                 currentSlideIndex = parseInt(dot.getAttribute("data-slide"));
                 updateSlider();
                 resetAutoSlide();
@@ -1130,38 +981,13 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    function nextSlide() {
-        currentSlideIndex = (currentSlideIndex + 1) % currentProjectMedia.length;
-        updateSlider();
-    }
+    function nextSlide() { currentSlideIndex = (currentSlideIndex + 1) % currentProjectMedia.length; updateSlider(); }
+    function prevSlide() { currentSlideIndex = (currentSlideIndex - 1 + currentProjectMedia.length) % currentProjectMedia.length; updateSlider(); }
 
-    function prevSlide() {
-        currentSlideIndex = (currentSlideIndex - 1 + currentProjectMedia.length) % currentProjectMedia.length;
-        updateSlider();
-    }
+    nextSlideBtn.addEventListener("click", () => { playUiSound('click'); nextSlide(); resetAutoSlide(); });
+    prevSlideBtn.addEventListener("click", () => { playUiSound('click'); prevSlide(); resetAutoSlide(); });
 
-    nextSlideBtn.addEventListener("click", () => {
-        nextSlide();
-        resetAutoSlide();
-    });
-
-    prevSlideBtn.addEventListener("click", () => {
-        prevSlide();
-        resetAutoSlide();
-    });
-
-    function startAutoSlide() {
-        if (currentProjectMedia.length > 1) {
-            slideInterval = setInterval(nextSlide, 4500);
-        }
-    }
-
-    function stopAutoSlide() {
-        clearInterval(slideInterval);
-    }
-
-    function resetAutoSlide() {
-        stopAutoSlide();
-        startAutoSlide();
-    }
+    function startAutoSlide() { if (currentProjectMedia.length > 1) slideInterval = setInterval(nextSlide, 4500); }
+    function stopAutoSlide() { clearInterval(slideInterval); }
+    function resetAutoSlide() { stopAutoSlide(); startAutoSlide(); }
 });

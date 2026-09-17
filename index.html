@@ -42,6 +42,12 @@
                 <i class="fa-solid fa-dice"></i> <span>Surprise Me!</span>
             </button>
             <div class="nav-right-actions">
+                <button class="utility-btn" id="audioToggleBtn" title="Toggle UI Sound Effects">
+                    <i class="fa-solid fa-volume-high" id="audioIcon"></i> <span>Sound: ON</span>
+                </button>
+                <button class="utility-btn" id="favoritesFilterBtn" title="View Bookmarked Apps">
+                    <i class="fa-solid fa-bookmark"></i> <span>Saved (<span id="favCountBadge">0</span>)</span>
+                </button>
                 <button class="utility-btn feedback-trigger-btn" id="openFeedbackBtn" title="Send App Ideas & Feedback">
                     <i class="fa-solid fa-comments"></i> <span>Send Feedback</span>
                 </button>
@@ -51,6 +57,18 @@
                 <button class="utility-btn theme-toggle" id="themeToggle" title="Toggle Theme">
                     <i class="fa-solid fa-moon" id="themeIcon"></i>
                 </button>
+            </div>
+        </div>
+
+        <!-- Featured Spotlight Hero Banner (Feature 5) -->
+        <div class="spotlight-hero-banner" id="spotlightBanner">
+            <div class="spotlight-glow-tag"><i class="fa-solid fa-fire"></i> Featured Spotlight #1 App</div>
+            <div class="spotlight-content">
+                <div>
+                    <h2 id="spotlightTitle">Loading Spotlight...</h2>
+                    <p id="spotlightDesc">Exploring top-voted application on Rick_Dev ecosystem.</p>
+                </div>
+                <button class="btn-primary" id="spotlightLaunchBtn"><i class="fa-solid fa-rocket"></i> Launch Now</button>
             </div>
         </div>
 
@@ -71,6 +89,7 @@
                 <div class="filter-sort-wrapper">
                     <div class="filter-bar" id="filterBar"></div>
                     <select id="sortSelect" class="sort-select">
+                        <option value="likes">Sort: Most Liked</option>
                         <option value="default">Sort: Featured</option>
                         <option value="az">A - Z</option>
                         <option value="za">Z - A</option>
@@ -106,8 +125,9 @@
             <!-- Interactive Modal Navigation Tabs -->
             <div class="modal-nav-tabs">
                 <button class="modal-tab-btn active" data-tab="overviewTab"><i class="fa-solid fa-circle-info"></i> Description & Media</button>
-                <button class="modal-tab-btn" data-tab="updateTab"><i class="fa-solid fa-clock-rotate-left"></i> Updates & Server Status</button>
-                <button class="modal-tab-btn" data-tab="tutorialTab"><i class="fa-solid fa-book-open"></i> Tutorial & Guide</button>
+                <button class="modal-tab-btn" data-tab="qrTab"><i class="fa-solid fa-qrcode"></i> Mobile QR Code</button>
+                <button class="modal-tab-btn" data-tab="updateTab"><i class="fa-solid fa-clock-rotate-left"></i> Updates & Status</button>
+                <button class="modal-tab-btn" data-tab="tutorialTab"><i class="fa-solid fa-book-open"></i> Tutorial Guide</button>
             </div>
 
             <div class="modal-tab-content-wrapper">
@@ -130,42 +150,41 @@
                     </div>
                 </div>
 
-                <!-- Tab 2: Updates & Server Status -->
+                <!-- Tab 2: Mobile QR Code Generator (Feature 1) -->
+                <div class="modal-tab-pane" id="qrTab">
+                    <div class="qr-pane-card" style="text-align:center; padding:20px;">
+                        <h3 class="pane-heading">Scan to Open on Mobile Device</h3>
+                        <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:15px;">Use your smartphone camera to instantly test this app on your phone!</p>
+                        <div id="qrcodeContainer" style="background:white; padding:15px; display:inline-block; border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,0.3);">
+                            <!-- Dynamic QR Code rendered via script -->
+                        </div>
+                        <p id="qrAppUrlText" style="color:var(--cyan); font-size:0.85rem; margin-top:12px; word-break:break-all;"></p>
+                    </div>
+                </div>
+
+                <!-- Tab 3: Updates & Server Status -->
                 <div class="modal-tab-pane" id="updateTab">
                     <div class="update-pane-card">
                         <div class="server-status-banner">
                             <i class="fa-solid fa-server" style="color:#34d399; font-size:1.8rem;"></i>
                             <div>
                                 <h4>Server State: Optimal & Active</h4>
-                                <p style="color:var(--text-muted); font-size:0.9rem;">Hosted on secure GitHub Pages nodes with live Firebase database synchronization.</p>
+                                <p style="color:var(--text-muted); font-size:0.9rem;">Hosted on secure GitHub Pages nodes with live Firestore synchronization.</p>
                             </div>
                         </div>
                         <div class="update-log-box" style="margin-top:20px;">
-                            <h4><i class="fa-solid fa-code-commit"></i> Latest Version & Update Timestamp</h4>
-                            <p id="modalLastUpdated" style="color:var(--cyan); font-weight:600; margin-top:8px; font-size:1.05rem;">Last Updated: September 15, 2026</p>
-                            <p style="color:var(--text-muted); font-size:0.95rem; margin-top:10px;" id="modalVersionNotes">Version 2.5.0 deployed successfully with enhanced UI animations, bug fixes, and lightning-fast asset loading.</p>
+                            <h4><i class="fa-solid fa-code-commit"></i> Latest Version & Timestamp</h4>
+                            <p id="modalLastUpdated" style="color:var(--cyan); font-weight:600; margin-top:8px; font-size:1.05rem;">Last Updated: September 17, 2026</p>
+                            <p style="color:var(--text-muted); font-size:0.95rem; margin-top:10px;" id="modalVersionNotes">Version deployed successfully with lightning-fast asset loading.</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Tab 3: Tutorial & Guide -->
+                <!-- Tab 4: Tutorial & Guide -->
                 <div class="modal-tab-pane" id="tutorialTab">
                     <div class="tutorial-pane-card">
                         <h3 class="pane-heading"><i class="fa-solid fa-graduation-cap"></i> Step-by-Step Tutorial</h3>
-                        <div class="tutorial-steps-list" id="modalTutorialList">
-                            <div class="tutorial-step">
-                                <span class="step-num">1</span>
-                                <p>Launch the application using the primary button below to open the live interactive environment.</p>
-                            </div>
-                            <div class="tutorial-step">
-                                <span class="step-num">2</span>
-                                <p>Explore the features, test controls, and experience the smooth real-time response.</p>
-                            </div>
-                            <div class="tutorial-step">
-                                <span class="step-num">3</span>
-                                <p>Leave a like or feedback to support Rick_Dev's ongoing creative developments!</p>
-                            </div>
-                        </div>
+                        <div class="tutorial-steps-list" id="modalTutorialList"></div>
                     </div>
                 </div>
             </div>
@@ -176,6 +195,9 @@
                 </a>
                 <button class="btn-secondary" id="modalCopyBtn">
                     <i class="fa-solid fa-copy"></i> Copy Link
+                </button>
+                <button class="btn-secondary bookmark-modal-btn" id="modalBookmarkBtn" title="Save to Favorites">
+                    <i class="fa-solid fa-bookmark"></i> <span id="bookmarkText">Save</span>
                 </button>
                 <button class="btn-like" id="modalLikeBtn">
                     <i class="fa-solid fa-heart"></i> <span id="likeCount">0</span>
@@ -194,7 +216,7 @@
             <div class="feedback-header">
                 <i class="fa-solid fa-user-check feedback-icon" style="color:var(--primary); background:rgba(99,102,241,0.15);"></i>
                 <h2 id="voterModalTitle">Who's Voting?</h2>
-                <p>Please enter your name or handle so Rick_Dev knows who gave this rating:</p>
+                <p>Please enter your name or handle so Rick_Dev knows who gave this rating (saved for future likes):</p>
             </div>
             <form id="voterIdentityForm">
                 <div class="form-group">
@@ -256,7 +278,7 @@
         </div>
     </div>
 
-    <!-- Admin CMS Dashboard Modal (Secured: Hold Ctrl + Shift + Alt + F2) -->
+    <!-- Admin CMS Dashboard Modal (Secured: Ctrl + Shift + Alt + F2) -->
     <div class="modal-overlay" id="adminModal">
         <div class="modal-content admin-modal-box">
             <button class="modal-close" id="adminClose"><i class="fa-solid fa-xmark"></i></button>
@@ -276,11 +298,16 @@
             <div id="adminHubScreen" class="admin-screen" style="display:none;">
                 <div class="admin-dash-header">
                     <h2><i class="fa-solid fa-gauge-high"></i> Admin Control Hub</h2>
-                    <span class="admin-badge">Connected to Firebase</span>
+                    <span class="admin-badge">Connected to Firestore</span>
                 </div>
-                <p style="color:var(--text-muted); margin-bottom:25px; text-align:left;">Choose which database management section you would like to access:</p>
+                <p style="color:var(--text-muted); margin-bottom:20px; text-align:left;">Choose which database management section you would like to access:</p>
                 
                 <div class="admin-hub-grid">
+                    <div class="hub-card" id="gotoAnalyticsHub">
+                        <i class="fa-solid fa-chart-pie" style="color:#a855f7;"></i>
+                        <h3>Traffic Visualizer (Feature 6)</h3>
+                        <p>View visual percentage distribution bars for visits and popularity.</p>
+                    </div>
                     <div class="hub-card" id="gotoVisitsHub">
                         <i class="fa-solid fa-chart-line" style="color:#38bdf8;"></i>
                         <h3>Website Visits Analytics</h3>
@@ -303,13 +330,25 @@
                     </div>
                     <div class="hub-card" id="gotoWebsitesHub">
                         <i class="fa-solid fa-globe"></i>
-                        <h3>Manage Websites</h3>
-                        <p>Add new portfolio links, upload media files, and delete old projects.</p>
+                        <h3>Manage Likes</h3>
+                        <p>Directly override and edit like counts for any project.</p>
                     </div>
                 </div>
             </div>
 
-            <!-- New Tab: Website Visits Analytics -->
+            <!-- Analytics Visualizer Screen (Feature 6) -->
+            <div id="adminAnalyticsScreen" class="admin-screen" style="display:none;">
+                <div class="admin-dash-header">
+                    <div>
+                        <button class="back-hub-btn" id="backToHubFromAnalytics"><i class="fa-solid fa-arrow-left"></i> Hub Menu</button>
+                        <h2 style="margin-top:8px;">📈 Traffic & Engagement Visualizer</h2>
+                    </div>
+                    <span class="admin-badge">Percentage Breakdown</span>
+                </div>
+                <div class="admin-entries-list" id="adminAnalyticsList"></div>
+            </div>
+
+            <!-- Website Visits Analytics Tab -->
             <div id="adminVisitsScreen" class="admin-screen" style="display:none;">
                 <div class="admin-dash-header">
                     <div>
@@ -321,7 +360,7 @@
                 <div class="admin-entries-list" id="adminVisitsList"></div>
             </div>
 
-            <!-- Section 1: See Who Liked Manager -->
+            <!-- Likes Manager -->
             <div id="adminLikesScreen" class="admin-screen" style="display:none;">
                 <div class="admin-dash-header">
                     <div>
@@ -333,7 +372,7 @@
                 <div class="admin-entries-list" id="adminLikesList"></div>
             </div>
 
-            <!-- Section 2: Feedback Manager -->
+            <!-- Feedback Manager -->
             <div id="adminFeedbackScreen" class="admin-screen" style="display:none;">
                 <div class="admin-dash-header">
                     <div>
@@ -351,7 +390,7 @@
                 <div class="admin-entries-list" id="adminEntriesList"></div>
             </div>
 
-            <!-- Section 3: Dislikes Manager -->
+            <!-- Dislikes Manager -->
             <div id="adminDislikesScreen" class="admin-screen" style="display:none;">
                 <div class="admin-dash-header">
                     <div>
@@ -363,68 +402,22 @@
                 <div class="admin-entries-list" id="adminDislikesList"></div>
             </div>
 
-            <!-- Section 4: Website CMS Manager -->
+            <!-- Website CMS & Direct Like Modifier Manager -->
             <div id="adminWebsitesScreen" class="admin-screen" style="display:none;">
                 <div class="admin-dash-header">
                     <div>
                         <button class="back-hub-btn" id="backToHubFromWebsites"><i class="fa-solid fa-arrow-left"></i> Hub Menu</button>
-                        <h2 style="margin-top:8px;">🌐 Portfolio Websites CMS</h2>
+                        <h2 style="margin-top:8px;">🌐 Manage Likes & Stats</h2>
                     </div>
-                    <div style="display:flex; gap:10px;">
-                        <button class="btn-primary" id="resetAllLikesBtn" style="padding:8px 14px; font-size:0.85rem; background:linear-gradient(135deg, #ef4444, #dc2626);"><i class="fa-solid fa-rotate-right"></i> Reset All Stats</button>
-                        <button class="btn-primary" id="openAddWebsiteBtn" style="padding:8px 14px; font-size:0.85rem;"><i class="fa-solid fa-plus"></i> Add New Website</button>
-                    </div>
+                    <button class="btn-primary" id="resetAllLikesBtn" style="padding:8px 14px; font-size:0.85rem; background:linear-gradient(135deg, #ef4444, #dc2626);"><i class="fa-solid fa-rotate-right"></i> Reset All Stats</button>
                 </div>
-                
-                <!-- Add Website Form -->
-                <div id="addWebsiteFormWrapper" class="add-website-form-box" style="display:none;">
-                    <h3>Add New Portfolio Website & Upload Media</h3>
-                    <form id="addWebsiteForm">
-                        <div class="form-row">
-                            <div class="form-group" style="flex:1;">
-                                <label>Website Name</label>
-                                <input type="text" id="newWebName" placeholder="e.g. Awesome Game" required class="cms-input">
-                            </div>
-                            <div class="form-group" style="flex:1;">
-                                <label>Category</label>
-                                <select id="newWebCategory" class="sort-select cms-select" style="width:100%; border-radius:10px;">
-                                    <option value="Games">Games</option>
-                                    <option value="Tools">Tools</option>
-                                    <option value="Entertainment">Entertainment</option>
-                                    <option value="Projects">Projects</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-group" style="margin-top:12px;">
-                            <label>Live URL (GitHub Pages link)</label>
-                            <input type="url" id="newWebUrl" placeholder="https://rickdevr.github.io/my-app/" required class="cms-input">
-                        </div>
-                        <div class="form-group" style="margin-top:12px;">
-                            <label>Description (Luxury Long Format)</label>
-                            <textarea id="newWebDesc" rows="3" placeholder="Detailed architectural and feature overview..." required class="cms-input" style="resize:vertical;"></textarea>
-                        </div>
-                        <div class="form-row" style="margin-top:12px;">
-                            <div class="form-group" style="flex:1;">
-                                <label>Tech Stack (comma separated)</label>
-                                <input type="text" id="newWebTech" placeholder="HTML, JS, Firebase" class="cms-input">
-                            </div>
-                            <div class="form-group" style="flex:1;">
-                                <label>Upload Media File from Computer</label>
-                                <input type="file" id="newWebMediaFile" accept="image/*,video/mp4" class="cms-input" style="padding:8px;">
-                            </div>
-                        </div>
-                        <div style="display:flex; gap:10px; margin-top:18px;">
-                            <button type="submit" class="btn-primary" style="flex:1;"><i class="fa-solid fa-floppy-disk"></i> Save to Database</button>
-                            <button type="button" class="btn-secondary" id="cancelAddWebBtn">Cancel</button>
-                        </div>
-                    </form>
-                </div>
-
                 <div class="admin-entries-list" id="adminWebsitesList" style="margin-top:15px;"></div>
             </div>
         </div>
     </div>
 
+    <!-- Import sites.js and script.js -->
+    <script type="module" src="sites.js"></script>
     <script type="module" src="script.js"></script>
 </body>
 </html>
