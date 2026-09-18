@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Rick_Dev | Luxury Creative Portfolio</title>
+    <link id="dynamicFavicon" rel="icon" href="data:,">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="dark-mode" data-accent-color="indigo" data-device-mode="auto">
+
+    <!-- Global Website Lockdown Screen -->
+    <div class="lockdown-screen" id="websiteLockdownScreen">
+        <div class="lockdown-content">
+            <i class="fa-solid fa-lock lockdown-icon"></i>
+            <h2>Platform Locked by Administrator</h2>
+            <p id="lockdownReasonText">This platform is currently secured and temporarily locked.</p>
+            <div id="lockdownTimerBox" style="margin:12px 0; font-size:1rem; font-weight:700; color:#f59e0b;"></div>
+            <div class="lockdown-badge"><i class="fa-solid fa-database"></i> Firestore Document: `site_config/master_lockdown`</div>
+        </div>
+    </div>
+
+    <!-- Auto-Lock Countdown Warning Banner -->
+    <div class="countdown-warning-banner" id="countdownWarningBanner">
+        <i class="fa-solid fa-triangle-exclamation" style="color:#f59e0b;"></i>
+        <span>Scheduled Global Lockdown in <strong id="countdownTimerDisplay">00:00</strong></span>
+    </div>
+
+    <!-- Global Maintenance Mode Banner -->
+    <div class="maintenance-banner" id="maintenanceBanner">
+        <i class="fa-solid fa-screwdriver-wrench" style="color:var(--cyan);"></i>
+        <span><strong>Maintenance Notice:</strong> <span id="maintenanceBannerText">Platform undergoing scheduled updates.</span> <strong id="maintenanceTimerBadge" style="margin-left:6px;"></strong></span>
+    </div>
+
+    <!-- Global Announcement Banner -->
+    <div class="global-announcement-banner" id="globalAnnouncementBanner">
+        <i class="fa-solid fa-bullhorn" style="color:var(--cyan);"></i>
+        <span id="announcementSenderBox" style="margin-right:6px;"></span>
+        <span id="announcementBannerText">System operational & synchronized.</span>
+        <span id="announcementTimerBadge" style="font-size:0.75rem; background:rgba(255,255,255,0.15); padding:2px 6px; border-radius:10px; margin-left:8px;"></span>
+    </div>
+
+    <canvas id="particleCanvas"></canvas>
+
+    <div class="activity-toast" id="activityToast">
+        <i class="fa-solid fa-bolt" style="color:var(--cyan);"></i>
+        <span id="toastMessage">Rick_Dev ecosystem fully active!</span>
+    </div>
+
+    <!-- Compact Floating Control Room Button -->
+    <button class="floating-admin-panel-btn" id="floatingAdminPanelBtn" title="Open Control Room">
+        <i class="fa-solid fa-crown"></i> <span>Control Room</span>
+    </button>
+
+    <!-- Device Selector Modal -->
+    <div class="modal-overlay active" id="devicePickerModal">
+        <div class="modal-content feedback-modal-box" style="text-align:center; max-width:540px;">
+            <div class="feedback-header">
+                <i class="fa-solid fa-mobile-screen-button feedback-icon" style="color:var(--primary); background:rgba(99,102,241,0.15);"></i>
+                <h2>Welcome to Rick_Dev!</h2>
+                <p>Select your current device for the ideal screen fit:</p>
+            </div>
+            <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:12px; margin:20px 0;">
+                <button class="device-select-btn" data-mode="mobile">
+                    <i class="fa-solid fa-mobile-screen" style="font-size:1.8rem; margin-bottom:8px; color:var(--primary);"></i>
+                    <span>Mobile Phone</span>
+                </button>
+                <button class="device-select-btn" data-mode="tablet">
+                    <i class="fa-solid fa-tablet-screen-button" style="font-size:1.8rem; margin-bottom:8px; color:var(--accent);"></i>
+                    <span>Tablet</span>
+                </button>
+                <button class="device-select-btn" data-mode="pc">
+                    <i class="fa-solid fa-desktop" style="font-size:1.8rem; margin-bottom:8px; color:var(--cyan);"></i>
+                    <span>PC / Laptop</span>
+                </button>
+            </div>
+            <button class="btn-primary" id="autoDetectDeviceBtn" style="width:100%;"><i class="fa-solid fa-wand-magic-sparkles"></i> Auto-Detect & Enter</button>
+        </div>
+    </div>
+
+    <!-- Mandatory / Changeable Username Registration Modal -->
+    <div class="modal-overlay" id="voterIdentityModal">
+        <div class="modal-content feedback-modal-box" style="text-align:center;">
+            <div class="feedback-header">
+                <i class="fa-solid fa-user-pen" style="font-size: 2.5rem; color: var(--primary); margin-bottom: 10px;"></i>
+                <h2 id="usernameModalTitle">Choose Your Username</h2>
+                <p style="font-size:0.85rem; color:var(--text-muted); margin-top:4px;">Usernames must be unique across the platform.</p>
+            </div>
+            <form id="voterIdentityForm" style="margin-top:15px;">
+                <input type="text" id="voterNameInput" placeholder="e.g. Rick_Dev" required class="cms-input" style="padding:12px; text-align:center; margin-bottom:12px; font-size:1.1rem;">
+                <button type="submit" class="btn-primary" style="width:100%;">Save Username</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Floating Scratchpad Drawer -->
+    <button class="scratchpad-toggle-btn" id="openScratchpadBtn" title="Open Visitor Notes">
+        <i class="fa-solid fa-pen-nib"></i>
+    </button>
+    <div class="scratchpad-drawer" id="scratchpadDrawer">
+        <div class="scratchpad-header">
+            <h3><i class="fa-solid fa-note-sticky"></i> Visitor Notes</h3>
+            <button class="modal-close" id="closeScratchpadBtn" style="position:static; width:28px; height:28px; font-size:0.8rem;"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <textarea id="scratchpadTextarea" placeholder="Type personal notes here..."></textarea>
+        <button class="btn-primary" id="saveScratchpadBtn" style="width:100%; margin-top:10px; padding:8px; font-size:0.85rem;"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+    </div>
+
+    <div class="bg-glow glow-1"></div>
+    <div class="bg-glow glow-2"></div>
+    <div class="bg-glow glow-3"></div>
+    <div class="bg-grid"></div>
+
+    <div class="app-container" id="appContainer">
+        <!-- Top Navigation -->
+        <div class="top-nav">
+            <button class="utility-btn" id="surpriseBtn" title="Surprise Me!">
+                <i class="fa-solid fa-dice"></i> <span class="btn-text">Surprise!</span>
+            </button>
+            <div class="nav-right-actions">
+                <div class="color-picker-dropdown" id="colorDropdownWrapper">
+                    <button class="utility-btn" id="colorPickerToggle" title="Change Theme Color">
+                        <i class="fa-solid fa-palette"></i> <span class="btn-text">Theme</span>
+                    </button>
+                    <div class="color-palette-menu" id="colorPaletteMenu">
+                        <span class="color-dot indigo" data-color="indigo" style="background:#6366f1;"></span>
+                        <span class="color-dot emerald" data-color="emerald" style="background:#10b981;"></span>
+                        <span class="color-dot rose" data-color="rose" style="background:#f43f5e;"></span>
+                        <span class="color-dot amber" data-color="amber" style="background:#f59e0b;"></span>
+                        <span class="color-dot cyan" data-color="cyan" style="background:#06b6d4;"></span>
+                    </div>
+                </div>
+
+                <button class="utility-btn" id="compareToggleBtn" title="Compare Apps">
+                    <i class="fa-solid fa-scale-balanced"></i> <span class="btn-text">Compare</span>
+                </button>
+                <button class="utility-btn" id="focusModeBtn" title="Toggle Focus">
+                    <i class="fa-solid fa-expand"></i>
+                </button>
+                <button class="utility-btn" id="audioToggleBtn" title="Toggle Sound">
+                    <i class="fa-solid fa-volume-high" id="audioIcon"></i>
+                </button>
+                <button class="utility-btn" id="favoritesFilterBtn" title="View Bookmarked Apps">
+                    <i class="fa-solid fa-bookmark"></i> <span class="btn-text">Saved (<span id="favCountBadge">0</span>)</span>
+                </button>
+                <button class="utility-btn feedback-trigger-btn" id="openFeedbackBtn" title="Send Feedback">
+                    <i class="fa-solid fa-comments"></i> <span class="btn-text">Feedback</span>
+                </button>
+                <button class="utility-btn" id="themeToggle" title="Toggle Dark/Light">
+                    <i class="fa-solid fa-moon" id="themeIcon"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Spotlight Banner -->
+        <div class="spotlight-hero-banner" id="spotlightBanner">
+            <div class="spotlight-glow-tag"><i class="fa-solid fa-fire"></i> Featured Spotlight #1 App</div>
+            <div class="spotlight-content">
+                <div>
+                    <h2 id="spotlightTitle">Loading Spotlight...</h2>
+                    <p id="spotlightDesc">Exploring top-voted application on Rick_Dev ecosystem.</p>
+                </div>
+                <button class="btn-primary" id="spotlightLaunchBtn"><i class="fa-solid fa-rocket"></i> Launch Now</button>
+            </div>
+        </div>
+
+        <!-- Header -->
+        <header class="header">
+            <div class="logo-badge animate-pop" id="headerProfileBadge" title="Click to Change Username" style="cursor:pointer;">
+                <div class="badge-icon-slot" id="badgeIconSlot"><i class="fa-solid fa-user-shield"></i></div>
+                <span id="headerUsernameDisplay">Guest</span>
+                <span id="headerRoleBadgeContainer"></span>
+            </div>
+            <h1 class="main-title">Interactive Web Portfolio & Apps</h1>
+            <p class="subtitle">Explore high-end web applications, immersive games, creative tools, and luxury experiments built with precision engineering.</p>
+            
+            <div class="controls-bar">
+                <div class="search-box">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="searchInput" placeholder="Search apps or tech... (Ctrl+K)">
+                    <span class="search-kbd">Ctrl+K</span>
+                </div>
+                
+                <div class="filter-sort-wrapper">
+                    <div class="filter-bar" id="filterBar"></div>
+                    <select id="sortSelect" class="sort-select">
+                        <option value="likes">Sort: Most Liked</option>
+                        <option value="default">Sort: Featured</option>
+                        <option value="az">A - Z</option>
+                        <option value="za">Z - A</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="stats-counter" id="statsCounter">Showing all luxury applications</div>
+        </header>
+
+        <main class="projects-grid" id="projectsGrid"></main>
+
+        <footer class="footer">
+            <p id="footerStats">Total Applications: 0 | Active Categories: 0</p>
+            <p style="margin-top:6px; font-size:0.75rem; opacity:0.7;"><i class="fa-solid fa-globe"></i> Control Room Active (Press **F2** if authorized)</p>
+        </footer>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal-overlay" id="commandPaletteModal">
+        <div class="modal-content command-modal-box">
+            <div class="search-box" style="max-width:100%; margin-bottom:15px;">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="commandInput" placeholder="Type to search apps...">
+            </div>
+            <div class="command-results-list" id="commandResultsList"></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="compareModal">
+        <div class="modal-content massive-luxury-modal" style="max-width:900px; height:auto;">
+            <button class="modal-close" id="compareClose"><i class="fa-solid fa-xmark"></i></button>
+            <h2 style="margin-bottom:15px;"><i class="fa-solid fa-scale-balanced"></i> Side-by-Side App Comparison</h2>
+            <div class="compare-selectors" style="display:flex; gap:15px; margin-bottom:20px; flex-wrap:wrap;">
+                <select id="compareSelect1" class="sort-select cms-select" style="flex:1;"></select>
+                <select id="compareSelect2" class="sort-select cms-select" style="flex:1;"></select>
+            </div>
+            <div class="compare-grid" id="compareGrid" style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;"></div>
+        </div>
+    </div>
+
+    <!-- Project Detail Modal with Reviews Tab -->
+    <div class="modal-overlay" id="projectModal">
+        <div class="modal-content massive-luxury-modal">
+            <button class="modal-close" id="modalClose"><i class="fa-solid fa-xmark"></i></button>
+            <div class="modal-header-banner">
+                <div class="modal-meta-top">
+                    <span class="modal-category" id="modalCategory">Category</span>
+                    <span class="modal-live-badge" id="liveStatusBadge"><span class="pulse-dot"></span> Online & Active</span>
+                    <span class="modal-visits-tag" id="modalVisitsTag"><i class="fa-solid fa-eye"></i> <span id="modalVisitsCount">0</span> Visits</span>
+                </div>
+                <h2 class="modal-title" id="modalTitle">Project Title</h2>
+                <div class="modal-tech-stack" id="modalTechStack"></div>
+            </div>
+            <div class="modal-nav-tabs">
+                <button class="modal-tab-btn active" data-tab="overviewTab"><i class="fa-solid fa-circle-info"></i> Overview</button>
+                <button class="modal-tab-btn" data-tab="qrTab"><i class="fa-solid fa-qrcode"></i> Mobile QR</button>
+                <button class="modal-tab-btn" data-tab="updateTab"><i class="fa-solid fa-clock-rotate-left"></i> Updates</button>
+                <button class="modal-tab-btn" data-tab="tutorialTab"><i class="fa-solid fa-book-open"></i> Tutorial</button>
+                <button class="modal-tab-btn" data-tab="reviewsTab"><i class="fa-solid fa-star"></i> Reviews & Ratings</button>
+            </div>
+            <div class="modal-tab-content-wrapper">
+                <div class="modal-tab-pane active" id="overviewTab">
+                    <div class="modal-body-grid">
+                        <div class="modal-media-section">
+                            <div class="media-slider" id="mediaSlider"></div>
+                            <div class="slider-controls" id="sliderControls">
+                                <button class="slide-btn prev-btn" id="prevSlide"><i class="fa-solid fa-chevron-left"></i></button>
+                                <div class="slider-dots" id="sliderDots"></div>
+                                <button class="slide-btn next-btn" id="nextSlide"><i class="fa-solid fa-chevron-right"></i></button>
+                            </div>
+                        </div>
+                        <div class="modal-info-pane">
+                            <h3 class="pane-heading">Comprehensive Overview</h3>
+                            <p class="modal-description" id="modalDescription">Description...</p>
+                            <p class="modal-explore-time" id="modalExploreTime"><i class="fa-regular fa-clock"></i> Est. 2 min explore</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-tab-pane" id="qrTab">
+                    <div class="qr-pane-card" style="text-align:center; padding:20px;">
+                        <h3 class="pane-heading">Scan to Open on Mobile</h3>
+                        <div id="qrcodeContainer" style="background:white; padding:15px; display:inline-block; border-radius:16px;"></div>
+                        <p id="qrAppUrlText" style="color:var(--cyan); font-size:0.85rem; margin-top:12px;"></p>
+                    </div>
+                </div>
+                <div class="modal-tab-pane" id="updateTab">
+                    <div class="update-pane-card">
+                        <h4 id="modalLastUpdated" style="color:var(--cyan); font-weight:600;">Last Updated: September 18, 2026</h4>
+                        <p style="color:var(--text-muted); font-size:0.9rem; margin-top:8px;" id="modalVersionNotes">Version deployed successfully.</p>
+                    </div>
+                </div>
+                <div class="modal-tab-pane" id="tutorialTab">
+                    <div class="tutorial-pane-card">
+                        <h3 class="pane-heading"><i class="fa-solid fa-graduation-cap"></i> Step-by-Step Tutorial</h3>
+                        <div class="tutorial-steps-list" id="modalTutorialList"></div>
+                    </div>
+                </div>
+                <div class="modal-tab-pane" id="reviewsTab">
+                    <div class="update-pane-card" style="display:flex; flex-direction:column; gap:12px;">
+                        <h3 class="pane-heading"><i class="fa-solid fa-star"></i> Leave a Review</h3>
+                        <form id="reviewForm" style="display:flex; flex-direction:column; gap:8px;">
+                            <select id="reviewRating" class="sort-select cms-select" style="width:100%;">
+                                <option value="5">⭐⭐⭐⭐⭐ (5/5 Stars)</option>
+                                <option value="4">⭐⭐⭐⭐ (4/5 Stars)</option>
+                                <option value="3">⭐⭐⭐ (3/5 Stars)</option>
+                                <option value="2">⭐⭐ (2/5 Stars)</option>
+                                <option value="1">⭐ (1/5 Stars)</option>
+                            </select>
+                            <textarea id="reviewText" rows="2" placeholder="Write your review..." required class="cms-input"></textarea>
+                            <button type="submit" class="btn-primary" style="padding:6px 12px; font-size:0.8rem;"><i class="fa-solid fa-paper-plane"></i> Submit Review</button>
+                        </form>
+                        <h4 style="margin-top:10px; border-top:1px solid var(--card-border); padding-top:10px;">Community Reviews:</h4>
+                        <div id="projectReviewsList" style="display:flex; flex-direction:column; gap:8px; max-height:220px; overflow-y:auto;"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions-footer">
+                <a href="#" class="btn-primary" id="modalVisitBtn" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square"></i> Launch</a>
+                <button class="btn-secondary" id="modalShareBtn"><i class="fa-solid fa-share-nodes"></i> Share</button>
+                <button class="btn-secondary" id="modalCopyBtn"><i class="fa-solid fa-copy"></i> Copy</button>
+                <button class="btn-secondary" id="modalBookmarkBtn"><i class="fa-solid fa-bookmark"></i> <span id="bookmarkText">Save</span></button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="feedbackModal">
+        <div class="modal-content feedback-modal-box">
+            <button class="modal-close" id="feedbackClose"><i class="fa-solid fa-xmark"></i></button>
+            <div class="feedback-header">
+                <h2>Send Feedback & Ideas</h2>
+            </div>
+            <form id="feedbackForm">
+                <select id="feedbackCategory" class="sort-select cms-select" style="width:100%; margin-bottom:10px;">
+                    <option value="Website Idea">💡 New Website Idea</option>
+                    <option value="General Feedback">💬 General Feedback</option>
+                    <option value="Bug Report">🐛 Bug Report</option>
+                </select>
+                <textarea id="feedbackMessage" rows="3" placeholder="Your message..." required class="cms-input"></textarea>
+                <button type="submit" class="btn-primary" style="width:100%; margin-top:15px;">Submit</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- GOD-MODE WORLD CONTROL ROOM (Modular Firestore Documents) -->
+    <div class="modal-overlay" id="adminModal">
+        <div class="modal-content admin-modal-box">
+            <button class="modal-close" id="adminClose"><i class="fa-solid fa-xmark"></i></button>
+            
+            <div id="adminLoginScreen" class="admin-screen">
+                <i class="fa-solid fa-shield-halved admin-lock-icon"></i>
+                <h2>Rick_Dev World Control Room</h2>
+                <p style="color:var(--text-muted); font-size:0.85rem; margin-top:6px;">Enter master PIN (2285) or verify Creator/Owner/Admin role:</p>
+                <input type="password" id="adminPassInput" placeholder="••••" style="width:100%; background:var(--card-bg); border:1px solid var(--card-border); padding:12px; border-radius:10px; color:var(--text-main); text-align:center; font-size:1.3rem; letter-spacing:4px; margin:15px 0; outline:none;" autocomplete="new-password">
+                <button id="adminLoginBtn" class="btn-primary" style="width:100%;">Unlock World Control Room</button>
+            </div>
+
+            <div id="adminHubScreen" class="admin-screen" style="display:none;">
+                <div class="admin-dash-header">
+                    <h2><i class="fa-solid fa-earth-americas"></i> World Control Room Hub</h2>
+                    <span class="admin-badge" id="hubRoleBadgeDisplay">Control Access Active</span>
+                </div>
+                <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:15px;">Select a modular Firestore configuration sector:</p>
+                
+                <div class="admin-hub-grid">
+                    <div class="hub-card" id="gotoSystemSector">
+                        <i class="fa-solid fa-microchip" style="color:#f59e0b;"></i>
+                        <h3>📁 site_config / (Modular Docs)</h3>
+                        <p>Separate docs for Master Lock, Maintenance, & Announcements.</p>
+                    </div>
+                    <div class="hub-card" id="gotoWebsiteLocksSector">
+                        <i class="fa-solid fa-shield-cat" style="color:#ef4444;"></i>
+                        <h3>📁 site_config / (Per-Site Locks)</h3>
+                        <p>Lock specific websites for seconds, minutes, hours, or permanently.</p>
+                    </div>
+                    <div class="hub-card" id="gotoWebsitesSector">
+                        <i class="fa-solid fa-globe" style="color:#38bdf8;"></i>
+                        <h3>📁 projects_database</h3>
+                        <p>Add new websites, delete apps, and manage URLs directly.</p>
+                    </div>
+                    <div class="hub-card" id="gotoFeedbackSector">
+                        <i class="fa-solid fa-comments" style="color:#a855f7;"></i>
+                        <h3>📁 user_feedback</h3>
+                        <p>Categorized feedback & bug reports submitted by visitors.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTOR 1: site_config Modular Documents -->
+            <div id="adminSystemScreen" class="admin-screen" style="display:none;">
+                <div class="admin-dash-header">
+                    <button class="back-hub-btn" id="backToHubFromSystem"><i class="fa-solid fa-arrow-left"></i> Hub</button>
+                    <h2>📁 site_config (Modular Documents)</h2>
+                </div>
+                <div class="admin-entries-list" style="display:flex; flex-direction:column; gap:12px;">
+                    <!-- User Role & Permission Granter -->
+                    <div class="admin-entry-card" style="flex-direction:column; gap:8px; background:rgba(99,102,241,0.08); border-color:var(--primary);">
+                        <h4 style="color:#818cf8;"><i class="fa-solid fa-user-shield"></i> Grant User Role & Upgraded Tag</h4>
+                        <input type="text" id="targetUsernameInput" class="cms-input" placeholder="Enter Username">
+                        <select id="targetRoleSelect" class="sort-select cms-select" style="width:100%;">
+                            <option value="creator">✨ Creator</option>
+                            <option value="owner">👑 Owner</option>
+                            <option value="admin">🛡️ Admin</option>
+                            <option value="moderator">⚔️ Moderator</option>
+                            <option value="member">⭐ Member</option>
+                        </select>
+                        <button class="btn-primary" id="saveUserRoleBtn" style="padding:6px 12px; font-size:0.8rem;"><i class="fa-solid fa-floppy-disk"></i> Grant Role Tag</button>
+                    </div>
+
+                    <!-- Registered Users Directory -->
+                    <div class="admin-entry-card" style="flex-direction:column; gap:8px;">
+                        <h4 style="color:#38bdf8;"><i class="fa-solid fa-users"></i> Registered Users Directory (<span id="userDirectoryCount">0</span>)</h4>
+                        <div id="adminUserDirectoryList" style="display:flex; flex-direction:column; gap:6px; max-height:130px; overflow-y:auto;"></div>
+                    </div>
+
+                    <!-- Document: site_config/master_lockdown -->
+                    <div class="admin-entry-card" style="flex-direction:column; gap:8px; border-color:rgba(239,68,68,0.4);">
+                        <h4 style="color:#ef4444;"><i class="fa-solid fa-lock"></i> Doc: `site_config/master_lockdown`</h4>
+                        <div style="display:flex; gap:10px; align-items:center;">
+                            <select id="lockdownTypeSelect" class="sort-select cms-select" style="flex:1;">
+                                <option value="instant">Instant Permanent Lockdown</option>
+                                <option value="timed">Timed Lockdown (Seconds / Mins / Hours)</option>
+                            </select>
+                            <input type="number" id="lockTimeVal" class="cms-input" placeholder="Time" style="width:80px; display:none;" value="5">
+                            <select id="lockTimeUnit" class="sort-select cms-select" style="width:110px; display:none;">
+                                <option value="seconds">Seconds</option>
+                                <option value="minutes" selected>Minutes</option>
+                                <option value="hours">Hours</option>
+                            </select>
+                        </div>
+                        <input type="text" id="lockReasonInput" class="cms-input" placeholder="Lockdown reason message..." style="margin-top:4px;">
+                        <div style="display:flex; gap:8px; margin-top:4px;">
+                            <button class="btn-primary" id="saveMasterLockBtn" style="background:linear-gradient(135deg, #ef4444, #f59e0b);"><i class="fa-solid fa-shield-halved"></i> Save Master Lockdown</button>
+                            <button class="delete-btn" id="removeMasterLockBtn" title="Lift Lockdown" style="width:auto; padding:6px 12px; border-radius:8px; font-size:0.8rem;"><i class="fa-solid fa-unlock"></i> Lift</button>
+                        </div>
+                    </div>
+
+                    <!-- Document: site_config/maintenance -->
+                    <div class="admin-entry-card" style="flex-direction:column; gap:8px; border-color:rgba(245,158,11,0.4);">
+                        <h4 style="color:#f59e0b;"><i class="fa-solid fa-screwdriver-wrench"></i> Doc: `site_config/maintenance`</h4>
+                        <div style="display:flex; gap:10px; align-items:center;">
+                            <select id="maintTypeSelect" class="sort-select cms-select" style="flex:1;">
+                                <option value="permanent">Permanent Maintenance</option>
+                                <option value="timed">Timed Maintenance (Secs / Mins / Hours)</option>
+                            </select>
+                            <input type="number" id="maintTimeVal" class="cms-input" placeholder="Time" style="width:80px; display:none;" value="30">
+                            <select id="maintTimeUnit" class="sort-select cms-select" style="width:110px; display:none;">
+                                <option value="seconds">Seconds</option>
+                                <option value="minutes" selected>Minutes</option>
+                                <option value="hours">Hours</option>
+                            </select>
+                        </div>
+                        <input type="text" id="maintNoticeInput" class="cms-input" placeholder="Maintenance Notice text..." style="margin-top:4px;">
+                        <div style="display:flex; gap:8px; margin-top:4px;">
+                            <button class="btn-primary" id="saveMaintenanceDocBtn" style="background:linear-gradient(135deg, #f59e0b, #10b981);"><i class="fa-solid fa-floppy-disk"></i> Save Maintenance Doc</button>
+                            <button class="delete-btn" id="removeMaintenanceDocBtn" title="Disable" style="width:auto; padding:6px 12px; border-radius:8px; font-size:0.8rem;"><i class="fa-solid fa-power-off"></i> Disable</button>
+                        </div>
+                    </div>
+
+                    <!-- Document: site_config/announcement -->
+                    <div class="admin-entry-card" style="flex-direction:column; gap:8px;">
+                        <h4 style="color:#a855f7;"><i class="fa-solid fa-bullhorn"></i> Doc: `site_config/announcement`</h4>
+                        <input type="text" id="announcementInput" class="cms-input" placeholder="Announcement broadcast text..." style="margin-top:4px;">
+                        <div style="display:flex; gap:8px; width:100%;">
+                            <button class="btn-primary" id="saveAnnouncementDocBtn" style="padding:6px 12px; font-size:0.8rem;"><i class="fa-solid fa-paper-plane"></i> Publish Announcement Doc</button>
+                            <button class="delete-btn" id="removeAnnouncementDocBtn" title="Remove" style="width:auto; padding:6px 12px; border-radius:8px; font-size:0.8rem;"><i class="fa-solid fa-trash"></i> Remove</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTOR 1.5: site_config/locks (Per-Site Specific Locks & Maintenance Manager) -->
+            <div id="adminWebsiteLocksScreen" class="admin-screen" style="display:none;">
+                <div class="admin-dash-header">
+                    <button class="back-hub-btn" id="backToHubFromLocks"><i class="fa-solid fa-arrow-left"></i> Hub</button>
+                    <h2>📁 site_config (Per-Site Locks & Maintenance)</h2>
+                </div>
+                <p style="color:var(--text-muted); font-size:0.8rem; margin-bottom:10px;">Select any application below to lock it or put it under maintenance for seconds, minutes, hours, or permanently (stored in separate Firestore documents under `site_config`).</p>
+                <div class="admin-entries-list" id="perSiteLocksContainer" style="display:flex; flex-direction:column; gap:10px;"></div>
+            </div>
+
+            <!-- SECTOR 2: projects_database -->
+            <div id="adminWebsitesScreen" class="admin-screen" style="display:none;">
+                <div class="admin-dash-header">
+                    <button class="back-hub-btn" id="backToHubFromWebsites"><i class="fa-solid fa-arrow-left"></i> Hub</button>
+                    <h2>📁 projects_database (Manage Websites)</h2>
+                </div>
+                <div class="admin-entries-list" style="display:flex; flex-direction:column; gap:12px;">
+                    <div class="admin-entry-card" style="flex-direction:column; gap:8px; background:rgba(99,102,241,0.08); border-color:var(--primary);">
+                        <h4 style="color:#818cf8;"><i class="fa-solid fa-plus"></i> Add New Website Directly</h4>
+                        <input type="text" id="newAppName" class="cms-input" placeholder="Website Name">
+                        <input type="text" id="newAppUrl" class="cms-input" placeholder="Website URL (https://...)">
+                        <input type="text" id="newAppCategory" class="cms-input" placeholder="Category (e.g. Tools, Games, Roblox)">
+                        <textarea id="newAppDesc" class="cms-input" placeholder="Description..." rows="2"></textarea>
+                        <button class="btn-primary" id="addNewAppBtn" style="margin-top:6px;"><i class="fa-solid fa-cloud-arrow-up"></i> Deploy Website to Database</button>
+                    </div>
+                    <h4 style="margin-top:10px;">Existing Active Websites:</h4>
+                    <div id="adminWebsitesListContainer" style="display:flex; flex-direction:column; gap:8px;"></div>
+                </div>
+            </div>
+
+            <!-- SECTOR 3: user_feedback -->
+            <div id="adminFeedbackScreen" class="admin-screen" style="display:none;">
+                <div class="admin-dash-header">
+                    <button class="back-hub-btn" id="backToHubFromFeedback"><i class="fa-solid fa-arrow-left"></i> Hub</button>
+                    <h2>📁 user_feedback (Categorized Submissions)</h2>
+                </div>
+                <div class="admin-filter-tabs" style="margin-bottom:10px; display:flex; gap:6px;">
+                    <button class="filter-btn active" data-feedback-cat="All">All</button>
+                    <button class="filter-btn" data-feedback-cat="Website Idea">💡 Ideas</button>
+                    <button class="filter-btn" data-feedback-cat="General Feedback">💬 Feedback</button>
+                    <button class="filter-btn" data-feedback-cat="Bug Report">🐛 Bug Reports</button>
+                </div>
+                <div class="admin-entries-list" id="adminEntriesList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="sites.js"></script>
+    <script type="module" src="script.js"></script>
+</body>
+</html>
