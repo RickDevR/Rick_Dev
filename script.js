@@ -61,6 +61,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const headerProfileBadge = document.getElementById("headerProfileBadge");
     const headerUsernameDisplay = document.getElementById("headerUsernameDisplay");
     const headerRoleBadgeContainer = document.getElementById("headerRoleBadgeContainer");
+    const floatingAdminBtn = document.getElementById("floatingAdminPanelBtn");
 
     if (!myUsername && voterIdentityModal) {
         voterIdentityModal.classList.add("active");
@@ -83,13 +84,11 @@ document.addEventListener("DOMContentLoaded", () => {
             const rawVal = document.getElementById("voterNameInput").value.trim();
             if (!rawVal) return;
 
-            // If username is unchanged, just close modal
             if (myUsername === rawVal) {
                 if (voterIdentityModal) voterIdentityModal.classList.remove("active");
                 return;
             }
 
-            // Check if new username is already taken by someone else
             const newUserRef = doc(db, "users", rawVal);
             const newUserSnap = await getDoc(newUserRef);
 
@@ -98,19 +97,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            // Preserve existing role before migrating
             let preservedRole = 'member';
             if (myUsername) {
                 const oldUserRef = doc(db, "users", myUsername);
                 const oldUserSnap = await getDoc(oldUserRef);
                 if (oldUserSnap.exists()) {
                     preservedRole = oldUserSnap.data().role || 'member';
-                    // Delete old document to free up old username
                     await deleteDoc(oldUserRef);
                 }
             }
 
-            // Create new username document in Firestore carrying over the exact role
             await setDoc(newUserRef, {
                 username: rawVal,
                 role: preservedRole,
@@ -125,6 +121,7 @@ document.addEventListener("DOMContentLoaded", () => {
             showToast(`Username updated to ${rawVal} (Role: ${preservedRole})!`);
 
             updateHeaderDisplay();
+            checkAndToggleFloatingAdminButton();
         });
     }
 
@@ -138,7 +135,17 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    const floatingAdminBtn = document.getElementById("floatingAdminPanelBtn");
+    function checkAndToggleFloatingAdminButton() {
+        if (!floatingAdminBtn) return;
+        const role = (myUsername && usersMap[myUsername]) ? usersMap[myUsername] : 'member';
+        if (['creator', 'owner', 'admin'].includes(role)) {
+            floatingAdminBtn.classList.add("show");
+            floatingAdminBtn.style.display = "inline-flex";
+        } else {
+            floatingAdminBtn.classList.remove("show");
+            floatingAdminBtn.style.display = "none";
+        }
+    }
 
     onSnapshot(collection(db, "users"), (snapshot) => {
         usersMap = {};
@@ -147,18 +154,8 @@ document.addEventListener("DOMContentLoaded", () => {
             usersMap[data.username] = data.role || 'member';
         });
 
-        if (myUsername && usersMap[myUsername]) {
-            const role = usersMap[myUsername];
-            if (['creator', 'owner', 'admin'].includes(role)) {
-                if (floatingAdminBtn) floatingAdminBtn.classList.add("show");
-            } else {
-                if (floatingAdminBtn) floatingAdminBtn.classList.remove("show");
-            }
-        } else {
-            if (floatingAdminBtn) floatingAdminBtn.classList.remove("show");
-        }
-
         updateHeaderDisplay();
+        checkAndToggleFloatingAdminButton();
         updateUserDirectoryUI();
     });
 
@@ -943,9 +940,21 @@ document.addEventListener("DOMContentLoaded", () => {
             const isBookmarked = localStorage.getItem(`bookmarked_${project.dbKey}`) === "true";
 
             return `
-                <div class="project-card" style="${isLocked ? 'opacity:0.5; pointer-events:none;' : ''}">
-                    ${isLocked ? `<div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); z-index:20; background:rgba(239,68,68,0.9); color:white; padding:6px 14px; border-radius:20px; font-size:0.75rem; font-weight:800;"><i class="fa-solid fa-lock"></i> LOCKED</div>` : ''}
-                    ${isMaint ? `<div style="position:absolute; top:10px; left:10px; z-index:20; background:rgba(245,158,11,0.9); color:white; padding:4px 10px; border-radius:12px; font-size:0.65rem; font-weight:800;"><i class="fa-solid fa-screwdriver-wrench"></i> MAINTENANCE</div>` : ''}
+                <div class="project-card ${isLocked ? 'locked-card' : ''} ${isMaint ? 'maintenance-card' : ''}">
+                    ${isLocked ? `
+                        <div class="card-lock-overlay">
+                            <i class="fa-solid fa-lock"></i>
+                            <h4>Website Locked</h4>
+                            <p>Secured by administrator</p>
+                        </div>
+                    ` : ''}
+                    ${isMaint ? `
+                        <div class="card-maint-overlay">
+                            <i class="fa-solid fa-screwdriver-wrench"></i>
+                            <h4>Under Maintenance</h4>
+                            <p>Scheduled platform updates</p>
+                        </div>
+                    ` : ''}
                     <button class="card-bookmark-btn ${isBookmarked ? 'bookmarked' : ''}" data-bookmark-key="${project.dbKey}"><i class="fa-solid fa-bookmark"></i></button>
                     <div class="card-media-wrapper card-click-trigger" data-index="${projects.indexOf(project)}">${previewEl}</div>
                     <div class="card-content">
@@ -1038,7 +1047,12 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         document.querySelectorAll(".card-click-trigger").forEach(el => {
-            el.addEventListener("click", () => { openModal(projects[el.getAttribute("data-index")]); });
+            el.addEventListener("click", () => {
+                const proj = projects[el.getAttribute("data-index")];
+                const status = siteSpecificStatus[proj.dbKey] || {};
+                if (status.locked) return; // Prevent opening locked apps
+                openModal(proj);
+            });
         });
     }
 
