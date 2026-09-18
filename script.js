@@ -12,6 +12,11 @@ const firebaseConfig = {
     measurementId: "G-0F6P507CKM"
 };
 
+// ==========================================
+// 🔔 DISCORD WEBHOOK CONFIGURATION
+const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1550584205069778954/8kH-KtDYtj1oWOts9hxkV39jWY7ctJaSaCy9WpVIuWQL_hGmbKn6ze9jvzMqp5BdXvy1";
+// ==========================================
+
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
@@ -118,7 +123,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (voterIdentityModal) voterIdentityModal.classList.remove("active");
             playUiSound('success');
-            showToast(`Username updated to ${rawVal} (Role: ${preservedRole})!`);
+            showToast(`Username updated to ${rawVal} (Role:${preservedRole})!`);
 
             updateHeaderDisplay();
             checkAndToggleFloatingAdminButton();
@@ -250,7 +255,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const hrs = Math.floor(distance / (1000 * 60 * 60));
                 const mins = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
                 const secs = Math.floor((distance % (1000 * 60)) / 1000);
-                if (maintTimerBadge) maintTimerBadge.textContent = `(Ends in ${hrs > 0 ? hrs + 'h ' : ''}${mins}m ${secs}s)`;
+                if (maintTimerBadge) maintTimerBadge.textContent = `(Ends in ${hrs > 0 ? hrs + 'h ' : ''}${mins}m${secs}s)`;
             }
         }, 1000);
     }
@@ -266,7 +271,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (data.text && data.text.trim() !== "") {
                 if (annText) annText.textContent = data.text;
                 if (data.sender) {
-                    if (annSenderBox) annSenderBox.innerHTML = `<strong>${data.sender}</strong> ${getRoleBadgeHtml(data.sender)}:`;
+                    if (annSenderBox) annSenderBox.innerHTML = `<strong>${data.sender}</strong>${getRoleBadgeHtml(data.sender)}:`;
                 }
                 if (annBanner) annBanner.classList.add("show");
 
@@ -298,7 +303,7 @@ document.addEventListener("DOMContentLoaded", () => {
             } else {
                 const mins = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
                 const secs = Math.floor((distance % (1000 * 60)) / 1000);
-                if (annTimerBadge) annTimerBadge.textContent = `Expires in ${mins}m ${secs}s`;
+                if (annTimerBadge) annTimerBadge.textContent = `Expires in ${mins}m${secs}s`;
             }
         }, 1000);
     }
@@ -458,7 +463,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <button class="filter-btn ${cat === activeCategory && !showingFavoritesOnly ? 'active' : ''}" data-category="${cat}">${cat}</button>
         `).join("");
 
-        if (footerStats) footerStats.textContent = `Total Applications: ${projects.length} | Active Categories: ${categories.length - 1}`;
+        if (footerStats) footerStats.textContent = `Total Applications: ${projects.length} \vert{} Active Categories:${categories.length - 1}`;
         if (projects.length > 0) {
             const top = [...projects].sort((a,b) => (b.likes || 0) - (a.likes || 0))[0];
             const spotTitle = document.getElementById("spotlightTitle");
@@ -487,6 +492,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (openFeedbackBtn && feedbackModal) openFeedbackBtn.addEventListener("click", () => { playUiSound('click'); feedbackModal.classList.add("active"); });
     if (feedbackClose && feedbackModal) feedbackClose.addEventListener("click", () => { feedbackModal.classList.remove("active"); });
+    
     if (feedbackForm) {
         feedbackForm.addEventListener("submit", async (e) => {
             e.preventDefault();
@@ -494,12 +500,43 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (voterIdentityModal) voterIdentityModal.classList.add("active");
                 return;
             }
+
+            const category = document.getElementById("feedbackCategory").value;
+            const message = document.getElementById("feedbackMessage").value.trim();
+            const role = usersMap[myUsername] || 'member';
+            const timestamp = new Date().toLocaleString();
+
             await addDoc(collection(db, "user_feedback"), {
-                category: document.getElementById("feedbackCategory").value,
+                category,
                 name: myUsername,
-                message: document.getElementById("feedbackMessage").value.trim(),
-                timestamp: new Date().toLocaleString()
+                message,
+                timestamp
             });
+
+            if (DISCORD_WEBHOOK_URL) {
+                try {
+                    const embed = {
+                        title: `📢 New Platform Feedback Received`,
+                        color: role === 'creator' ? 16766720 : (role === 'owner' ? 14745599 : (role === 'admin' ? 15548997 : 3447003)),
+                        fields: [
+                            { name: "👤 User", value: `**${myUsername}**`, inline: true },
+                            { name: "👑 Rank / Role", value: `\`${role.toUpperCase()}\``, inline: true },
+                            { name: "📁 Category", value: `\`${category}\``, inline: true },
+                            { name: "💬 Message", value: message }
+                        ],
+                        timestamp: new Date().toISOString()
+                    };
+
+                    await fetch(DISCORD_WEBHOOK_URL, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ embeds: [embed] })
+                    });
+                } catch (err) {
+                    console.error("Failed to send Discord webhook:", err);
+                }
+            }
+
             playUiSound('success');
             showToast("Feedback submitted successfully!");
             if (feedbackModal) feedbackModal.classList.remove("active");
@@ -1050,7 +1087,7 @@ document.addEventListener("DOMContentLoaded", () => {
             el.addEventListener("click", () => {
                 const proj = projects[el.getAttribute("data-index")];
                 const status = siteSpecificStatus[proj.dbKey] || {};
-                if (status.locked) return; // Prevent opening locked apps
+                if (status.locked) return;
                 openModal(proj);
             });
         });
