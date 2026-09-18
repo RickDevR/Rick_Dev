@@ -2,32 +2,87 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Rick_Dev | Luxury Creative Portfolio</title>
-    <!-- Dynamic Favicon Container -->
     <link id="dynamicFavicon" rel="icon" href="data:,">
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="dark-mode">
+<body class="dark-mode" data-accent-color="indigo" data-device-mode="auto">
 
-    <!-- Cinematic Luxury Loading Screen -->
-    <div class="loader-overlay" id="cinematicLoader">
-        <div class="loader-backdrop-glow"></div>
-        <div class="loader-quantum-ring"></div>
-        <div class="loader-content animate-pop">
-            <div class="loader-icon-wrapper" id="loaderIconWrapper">
-                <i class="fa-solid fa-crown loader-default-icon" id="loaderDefaultIcon"></i>
-            </div>
-            <div class="loader-badge-tag"><i class="fa-solid fa-wand-magic-sparkles"></i> Rick_Dev Cinematic Experience</div>
-            <h2 class="loader-title">Rick_Dev Ecosystem</h2>
-            <p class="loader-subtitle" id="loaderSubtitle">Initializing cinematic shaders & secure vault...</p>
-            <div class="loader-progress-bar">
-                <div class="loader-progress-fill" id="loaderProgressFill"></div>
-            </div>
-            <div class="loader-status-text" id="loaderStatusText">0%</div>
+    <!-- Global Website Lockdown Screen -->
+    <div class="lockdown-screen" id="websiteLockdownScreen">
+        <div class="lockdown-content">
+            <i class="fa-solid fa-lock lockdown-icon"></i>
+            <h2>Website Locked by Administrator</h2>
+            <p id="lockdownReasonText">This platform is currently secured and temporarily locked. Please check back later.</p>
+            <div class="lockdown-badge"><i class="fa-solid fa-database"></i> Status: Locked in Firestore (`site_config/master_control`)</div>
         </div>
+    </div>
+
+    <!-- Auto-Lock Countdown Warning Banner -->
+    <div class="countdown-warning-banner" id="countdownWarningBanner">
+        <i class="fa-solid fa-triangle-exclamation" style="color:#f59e0b;"></i>
+        <span>Scheduled Maintenance Lock in <strong id="countdownTimerDisplay">00:00</strong></span>
+    </div>
+
+    <!-- Global Maintenance Mode Banner (Allows browsing with notice) -->
+    <div class="maintenance-banner" id="maintenanceBanner">
+        <i class="fa-solid fa-screwdriver-wrench" style="color:var(--cyan);"></i>
+        <span><strong>Maintenance Notice:</strong> Platform is currently undergoing scheduled updates. Some experimental features may temporarily fluctuate.</span>
+    </div>
+
+    <!-- Global Announcement Banner -->
+    <div class="global-announcement-banner" id="globalAnnouncementBanner">
+        <i class="fa-solid fa-bullhorn" style="color:var(--cyan);"></i>
+        <span id="announcementBannerText">System operational & synchronized with Firestore.</span>
+    </div>
+
+    <canvas id="particleCanvas"></canvas>
+
+    <div class="activity-toast" id="activityToast">
+        <i class="fa-solid fa-bolt" style="color:var(--cyan);"></i>
+        <span id="toastMessage">Rick_Dev ecosystem fully active!</span>
+    </div>
+
+    <!-- Device Selector Modal -->
+    <div class="modal-overlay active" id="devicePickerModal">
+        <div class="modal-content feedback-modal-box" style="text-align:center; max-width:540px;">
+            <div class="feedback-header">
+                <i class="fa-solid fa-mobile-screen-button feedback-icon" style="color:var(--primary); background:rgba(99,102,241,0.15);"></i>
+                <h2>Welcome to Rick_Dev!</h2>
+                <p>Select your current device for the ideal screen fit:</p>
+            </div>
+            <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:12px; margin:20px 0;">
+                <button class="device-select-btn" data-mode="mobile">
+                    <i class="fa-solid fa-mobile-screen" style="font-size:1.8rem; margin-bottom:8px; color:var(--primary);"></i>
+                    <span>Mobile Phone</span>
+                </button>
+                <button class="device-select-btn" data-mode="tablet">
+                    <i class="fa-solid fa-tablet-screen-button" style="font-size:1.8rem; margin-bottom:8px; color:var(--accent);"></i>
+                    <span>Tablet</span>
+                </button>
+                <button class="device-select-btn" data-mode="pc">
+                    <i class="fa-solid fa-desktop" style="font-size:1.8rem; margin-bottom:8px; color:var(--cyan);"></i>
+                    <span>PC / Laptop</span>
+                </button>
+            </div>
+            <button class="btn-primary" id="autoDetectDeviceBtn" style="width:100%;"><i class="fa-solid fa-wand-magic-sparkles"></i> Auto-Detect & Enter</button>
+        </div>
+    </div>
+
+    <!-- Floating Scratchpad Drawer -->
+    <button class="scratchpad-toggle-btn" id="openScratchpadBtn" title="Open Visitor Notes">
+        <i class="fa-solid fa-pen-nib"></i>
+    </button>
+    <div class="scratchpad-drawer" id="scratchpadDrawer">
+        <div class="scratchpad-header">
+            <h3><i class="fa-solid fa-note-sticky"></i> Visitor Notes</h3>
+            <button class="modal-close" id="closeScratchpadBtn" style="position:static; width:28px; height:28px; font-size:0.8rem;"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <textarea id="scratchpadTextarea" placeholder="Type personal notes here..."></textarea>
+        <button class="btn-primary" id="saveScratchpadBtn" style="width:100%; margin-top:10px; padding:8px; font-size:0.85rem;"><i class="fa-solid fa-floppy-disk"></i> Save</button>
     </div>
 
     <div class="bg-glow glow-1"></div>
@@ -35,32 +90,48 @@
     <div class="bg-glow glow-3"></div>
     <div class="bg-grid"></div>
 
-    <div class="app-container">
-        <!-- Top Utility Bar -->
+    <div class="app-container" id="appContainer">
+        <!-- Top Navigation -->
         <div class="top-nav">
             <button class="utility-btn" id="surpriseBtn" title="Surprise Me!">
-                <i class="fa-solid fa-dice"></i> <span>Surprise Me!</span>
+                <i class="fa-solid fa-dice"></i> <span class="btn-text">Surprise!</span>
             </button>
             <div class="nav-right-actions">
-                <button class="utility-btn" id="audioToggleBtn" title="Toggle UI Sound Effects">
-                    <i class="fa-solid fa-volume-high" id="audioIcon"></i> <span>Sound: ON</span>
+                <div class="color-picker-dropdown" id="colorDropdownWrapper">
+                    <button class="utility-btn" id="colorPickerToggle" title="Change Theme Color">
+                        <i class="fa-solid fa-palette"></i> <span class="btn-text">Theme</span>
+                    </button>
+                    <div class="color-palette-menu" id="colorPaletteMenu">
+                        <span class="color-dot indigo" data-color="indigo" style="background:#6366f1;"></span>
+                        <span class="color-dot emerald" data-color="emerald" style="background:#10b981;"></span>
+                        <span class="color-dot rose" data-color="rose" style="background:#f43f5e;"></span>
+                        <span class="color-dot amber" data-color="amber" style="background:#f59e0b;"></span>
+                        <span class="color-dot cyan" data-color="cyan" style="background:#06b6d4;"></span>
+                    </div>
+                </div>
+
+                <button class="utility-btn" id="compareToggleBtn" title="Compare Apps">
+                    <i class="fa-solid fa-scale-balanced"></i> <span class="btn-text">Compare</span>
+                </button>
+                <button class="utility-btn" id="focusModeBtn" title="Toggle Focus">
+                    <i class="fa-solid fa-expand"></i>
+                </button>
+                <button class="utility-btn" id="audioToggleBtn" title="Toggle Sound">
+                    <i class="fa-solid fa-volume-high" id="audioIcon"></i>
                 </button>
                 <button class="utility-btn" id="favoritesFilterBtn" title="View Bookmarked Apps">
-                    <i class="fa-solid fa-bookmark"></i> <span>Saved (<span id="favCountBadge">0</span>)</span>
+                    <i class="fa-solid fa-bookmark"></i> <span class="btn-text">Saved (<span id="favCountBadge">0</span>)</span>
                 </button>
-                <button class="utility-btn feedback-trigger-btn" id="openFeedbackBtn" title="Send App Ideas & Feedback">
-                    <i class="fa-solid fa-comments"></i> <span>Send Feedback</span>
+                <button class="utility-btn feedback-trigger-btn" id="openFeedbackBtn" title="Send Feedback">
+                    <i class="fa-solid fa-comments"></i> <span class="btn-text">Feedback</span>
                 </button>
-                <button class="utility-btn" id="exportBtn" title="Download Projects JSON">
-                    <i class="fa-solid fa-download"></i> <span>Export JSON</span>
-                </button>
-                <button class="utility-btn theme-toggle" id="themeToggle" title="Toggle Theme">
+                <button class="utility-btn" id="themeToggle" title="Toggle Dark/Light">
                     <i class="fa-solid fa-moon" id="themeIcon"></i>
                 </button>
             </div>
         </div>
 
-        <!-- Featured Spotlight Hero Banner (Feature 5) -->
+        <!-- Spotlight Banner -->
         <div class="spotlight-hero-banner" id="spotlightBanner">
             <div class="spotlight-glow-tag"><i class="fa-solid fa-fire"></i> Featured Spotlight #1 App</div>
             <div class="spotlight-content">
@@ -72,6 +143,7 @@
             </div>
         </div>
 
+        <!-- Header -->
         <header class="header">
             <div class="logo-badge animate-pop" id="headerLogoBadge">
                 <div class="badge-icon-slot" id="badgeIconSlot"><i class="fa-solid fa-crown"></i></div>
@@ -83,7 +155,8 @@
             <div class="controls-bar">
                 <div class="search-box">
                     <i class="fa-solid fa-magnifying-glass"></i>
-                    <input type="text" id="searchInput" placeholder="Search luxury apps or tech... (Press Ctrl+K)">
+                    <input type="text" id="searchInput" placeholder="Search apps or tech... (Ctrl+K)">
+                    <span class="search-kbd">Ctrl+K</span>
                 </div>
                 
                 <div class="filter-sort-wrapper">
@@ -104,14 +177,36 @@
 
         <footer class="footer">
             <p id="footerStats">Total Applications: 0 | Active Categories: 0</p>
+            <p style="margin-top:6px; font-size:0.75rem; opacity:0.7;"><i class="fa-solid fa-globe"></i> God-Mode World Control Room Active (Vault: Ctrl+Shift+Alt+F2)</p>
         </footer>
     </div>
 
-    <!-- Massive Renovated Detail Page Modal -->
+    <!-- Modals -->
+    <div class="modal-overlay" id="commandPaletteModal">
+        <div class="modal-content command-modal-box">
+            <div class="search-box" style="max-width:100%; margin-bottom:15px;">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="commandInput" placeholder="Type to search apps...">
+            </div>
+            <div class="command-results-list" id="commandResultsList"></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="compareModal">
+        <div class="modal-content massive-luxury-modal" style="max-width:900px; height:auto;">
+            <button class="modal-close" id="compareClose"><i class="fa-solid fa-xmark"></i></button>
+            <h2 style="margin-bottom:15px;"><i class="fa-solid fa-scale-balanced"></i> Side-by-Side App Comparison</h2>
+            <div class="compare-selectors" style="display:flex; gap:15px; margin-bottom:20px; flex-wrap:wrap;">
+                <select id="compareSelect1" class="sort-select cms-select" style="flex:1;"></select>
+                <select id="compareSelect2" class="sort-select cms-select" style="flex:1;"></select>
+            </div>
+            <div class="compare-grid" id="compareGrid" style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;"></div>
+        </div>
+    </div>
+
     <div class="modal-overlay" id="projectModal">
         <div class="modal-content massive-luxury-modal">
             <button class="modal-close" id="modalClose"><i class="fa-solid fa-xmark"></i></button>
-            
             <div class="modal-header-banner">
                 <div class="modal-meta-top">
                     <span class="modal-category" id="modalCategory">Category</span>
@@ -121,17 +216,13 @@
                 <h2 class="modal-title" id="modalTitle">Project Title</h2>
                 <div class="modal-tech-stack" id="modalTechStack"></div>
             </div>
-
-            <!-- Interactive Modal Navigation Tabs -->
             <div class="modal-nav-tabs">
-                <button class="modal-tab-btn active" data-tab="overviewTab"><i class="fa-solid fa-circle-info"></i> Description & Media</button>
-                <button class="modal-tab-btn" data-tab="qrTab"><i class="fa-solid fa-qrcode"></i> Mobile QR Code</button>
-                <button class="modal-tab-btn" data-tab="updateTab"><i class="fa-solid fa-clock-rotate-left"></i> Updates & Status</button>
-                <button class="modal-tab-btn" data-tab="tutorialTab"><i class="fa-solid fa-book-open"></i> Tutorial Guide</button>
+                <button class="modal-tab-btn active" data-tab="overviewTab"><i class="fa-solid fa-circle-info"></i> Overview</button>
+                <button class="modal-tab-btn" data-tab="qrTab"><i class="fa-solid fa-qrcode"></i> Mobile QR</button>
+                <button class="modal-tab-btn" data-tab="updateTab"><i class="fa-solid fa-clock-rotate-left"></i> Updates</button>
+                <button class="modal-tab-btn" data-tab="tutorialTab"><i class="fa-solid fa-book-open"></i> Tutorial</button>
             </div>
-
             <div class="modal-tab-content-wrapper">
-                <!-- Tab 1: Description & Media -->
                 <div class="modal-tab-pane active" id="overviewTab">
                     <div class="modal-body-grid">
                         <div class="modal-media-section">
@@ -145,42 +236,23 @@
                         <div class="modal-info-pane">
                             <h3 class="pane-heading">Comprehensive Overview</h3>
                             <p class="modal-description" id="modalDescription">Description...</p>
-                            <p class="modal-explore-time" id="modalExploreTime"><i class="fa-regular fa-clock"></i> Est. 2 min explore time</p>
+                            <p class="modal-explore-time" id="modalExploreTime"><i class="fa-regular fa-clock"></i> Est. 2 min explore</p>
                         </div>
                     </div>
                 </div>
-
-                <!-- Tab 2: Mobile QR Code Generator (Feature 1) -->
                 <div class="modal-tab-pane" id="qrTab">
                     <div class="qr-pane-card" style="text-align:center; padding:20px;">
-                        <h3 class="pane-heading">Scan to Open on Mobile Device</h3>
-                        <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:15px;">Use your smartphone camera to instantly test this app on your phone!</p>
-                        <div id="qrcodeContainer" style="background:white; padding:15px; display:inline-block; border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,0.3);">
-                            <!-- Dynamic QR Code rendered via script -->
-                        </div>
-                        <p id="qrAppUrlText" style="color:var(--cyan); font-size:0.85rem; margin-top:12px; word-break:break-all;"></p>
+                        <h3 class="pane-heading">Scan to Open on Mobile</h3>
+                        <div id="qrcodeContainer" style="background:white; padding:15px; display:inline-block; border-radius:16px;"></div>
+                        <p id="qrAppUrlText" style="color:var(--cyan); font-size:0.85rem; margin-top:12px;"></p>
                     </div>
                 </div>
-
-                <!-- Tab 3: Updates & Server Status -->
                 <div class="modal-tab-pane" id="updateTab">
                     <div class="update-pane-card">
-                        <div class="server-status-banner">
-                            <i class="fa-solid fa-server" style="color:#34d399; font-size:1.8rem;"></i>
-                            <div>
-                                <h4>Server State: Optimal & Active</h4>
-                                <p style="color:var(--text-muted); font-size:0.9rem;">Hosted on secure GitHub Pages nodes with live Firestore synchronization.</p>
-                            </div>
-                        </div>
-                        <div class="update-log-box" style="margin-top:20px;">
-                            <h4><i class="fa-solid fa-code-commit"></i> Latest Version & Timestamp</h4>
-                            <p id="modalLastUpdated" style="color:var(--cyan); font-weight:600; margin-top:8px; font-size:1.05rem;">Last Updated: September 17, 2026</p>
-                            <p style="color:var(--text-muted); font-size:0.95rem; margin-top:10px;" id="modalVersionNotes">Version deployed successfully with lightning-fast asset loading.</p>
-                        </div>
+                        <h4 id="modalLastUpdated" style="color:var(--cyan); font-weight:600;">Last Updated: September 18, 2026</h4>
+                        <p style="color:var(--text-muted); font-size:0.9rem; margin-top:8px;" id="modalVersionNotes">Version deployed successfully.</p>
                     </div>
                 </div>
-
-                <!-- Tab 4: Tutorial & Guide -->
                 <div class="modal-tab-pane" id="tutorialTab">
                     <div class="tutorial-pane-card">
                         <h3 class="pane-heading"><i class="fa-solid fa-graduation-cap"></i> Step-by-Step Tutorial</h3>
@@ -188,235 +260,186 @@
                     </div>
                 </div>
             </div>
-
             <div class="modal-actions-footer">
-                <a href="#" class="btn-primary" id="modalVisitBtn" target="_blank" rel="noopener noreferrer">
-                    <i class="fa-solid fa-arrow-up-right-from-square"></i> Launch Application
-                </a>
-                <button class="btn-secondary" id="modalCopyBtn">
-                    <i class="fa-solid fa-copy"></i> Copy Link
-                </button>
-                <button class="btn-secondary bookmark-modal-btn" id="modalBookmarkBtn" title="Save to Favorites">
-                    <i class="fa-solid fa-bookmark"></i> <span id="bookmarkText">Save</span>
-                </button>
-                <button class="btn-like" id="modalLikeBtn">
-                    <i class="fa-solid fa-heart"></i> <span id="likeCount">0</span>
-                </button>
-                <button class="btn-dislike" id="modalDislikeBtn">
-                    <i class="fa-solid fa-thumbs-down"></i> <span id="dislikeCount">0</span>
-                </button>
+                <a href="#" class="btn-primary" id="modalVisitBtn" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square"></i> Launch</a>
+                <button class="btn-secondary" id="modalShareBtn"><i class="fa-solid fa-share-nodes"></i> Share</button>
+                <button class="btn-secondary" id="modalCopyBtn"><i class="fa-solid fa-copy"></i> Copy</button>
+                <button class="btn-secondary" id="modalBookmarkBtn"><i class="fa-solid fa-bookmark"></i> <span id="bookmarkText">Save</span></button>
+                <button class="btn-like" id="modalLikeBtn"><i class="fa-solid fa-heart"></i> <span id="likeCount">0</span></button>
+                <button class="btn-dislike" id="modalDislikeBtn"><i class="fa-solid fa-thumbs-down"></i> <span id="dislikeCount">0</span></button>
             </div>
         </div>
     </div>
 
-    <!-- Voter Identity Modal -->
     <div class="modal-overlay" id="voterIdentityModal">
         <div class="modal-content feedback-modal-box">
             <button class="modal-close" id="voterIdentityClose"><i class="fa-solid fa-xmark"></i></button>
             <div class="feedback-header">
-                <i class="fa-solid fa-user-check feedback-icon" style="color:var(--primary); background:rgba(99,102,241,0.15);"></i>
                 <h2 id="voterModalTitle">Who's Voting?</h2>
-                <p>Please enter your name or handle so Rick_Dev knows who gave this rating (saved for future likes):</p>
             </div>
             <form id="voterIdentityForm">
-                <div class="form-group">
-                    <input type="text" id="voterNameInput" placeholder="e.g. Alex / RickFan99" required class="cms-input" style="padding:14px; text-align:center; font-size:1.1rem;">
-                </div>
-                <div id="dislikeSpecificFields" style="display:none; margin-top:15px;">
-                    <div class="form-group">
-                        <label>Reason for Dislike</label>
-                        <select id="dislikeReasonSelect" class="sort-select cms-select" style="width:100%; border-radius:12px; margin-top:5px;">
-                            <option value="Bug / Error">🐛 Bug or Error Encountered</option>
-                            <option value="Slow Loading">⚡ Slow Loading / Performance</option>
-                            <option value="Hard to Use">🧩 Confusing UI / Hard to Use</option>
-                            <option value="Other">📝 Other Reason</option>
-                        </select>
-                    </div>
-                    <div class="form-group" style="margin-top:12px;">
-                        <textarea id="dislikeReasonText" rows="2" placeholder="Additional details (optional)..." class="cms-input" style="resize:vertical;"></textarea>
-                    </div>
-                </div>
-                <button type="submit" class="btn-primary" style="width:100%; margin-top: 20px;">
-                    <i class="fa-solid fa-paper-plane"></i> Submit Vote
-                </button>
+                <input type="text" id="voterNameInput" placeholder="e.g. Alex" required class="cms-input" style="padding:12px; text-align:center;">
+                <button type="submit" class="btn-primary" style="width:100%; margin-top:15px;">Submit Vote</button>
             </form>
         </div>
     </div>
 
-    <!-- Feedback & App Ideas Modal -->
     <div class="modal-overlay" id="feedbackModal">
         <div class="modal-content feedback-modal-box">
             <button class="modal-close" id="feedbackClose"><i class="fa-solid fa-xmark"></i></button>
-            <div class="feedback-container">
-                <div class="feedback-header">
-                    <i class="fa-solid fa-lightbulb feedback-icon"></i>
-                    <h2>Send App Ideas & Feedback</h2>
-                    <p>Have an idea for a new website or feedback on existing ones? Let Rick_Dev know directly!</p>
-                </div>
-                <form id="feedbackForm">
-                    <div class="form-group">
-                        <label>Select Category</label>
-                        <select id="feedbackCategory" class="sort-select cms-select" style="width:100%; border-radius:12px; margin-top:5px;">
-                            <option value="Website Idea">💡 New Website Idea</option>
-                            <option value="General Feedback">💬 General Feedback</option>
-                            <option value="Bug Report">🐛 Bug Report / Issue</option>
-                        </select>
-                    </div>
-                    <div class="form-group" style="margin-top: 15px;">
-                        <label>Your Name / Handle (Optional)</label>
-                        <input type="text" id="feedbackName" placeholder="e.g. Anonymous / Friend" class="cms-input">
-                    </div>
-                    <div class="form-group" style="margin-top: 15px;">
-                        <label>Your Message / Idea</label>
-                        <textarea id="feedbackMessage" rows="4" placeholder="Describe your app idea or feedback here..." required class="cms-input" style="resize:vertical; font-family:inherit;"></textarea>
-                    </div>
-                    <button type="submit" class="btn-primary" style="width:100%; margin-top: 20px;">
-                        <i class="fa-solid fa-paper-plane"></i> Submit Idea / Feedback
-                    </button>
-                </form>
+            <div class="feedback-header">
+                <h2>Send Feedback & Ideas</h2>
             </div>
+            <form id="feedbackForm">
+                <select id="feedbackCategory" class="sort-select cms-select" style="width:100%; margin-bottom:10px;">
+                    <option value="Website Idea">💡 New Website Idea</option>
+                    <option value="General Feedback">💬 General Feedback</option>
+                    <option value="Bug Report">🐛 Bug Report</option>
+                </select>
+                <input type="text" id="feedbackName" placeholder="Your Name (Optional)" class="cms-input" style="margin-bottom:10px;">
+                <textarea id="feedbackMessage" rows="3" placeholder="Your message..." required class="cms-input"></textarea>
+                <button type="submit" class="btn-primary" style="width:100%; margin-top:15px;">Submit</button>
+            </form>
         </div>
     </div>
 
-    <!-- Admin CMS Dashboard Modal (Secured: Ctrl + Shift + Alt + F2) -->
+    <!-- GOD-MODE WORLD CONTROL ROOM (Ctrl + Shift + Alt + F2, Passcode: 2285) -->
     <div class="modal-overlay" id="adminModal">
         <div class="modal-content admin-modal-box">
             <button class="modal-close" id="adminClose"><i class="fa-solid fa-xmark"></i></button>
             
-            <!-- Login Screen -->
             <div id="adminLoginScreen" class="admin-screen">
                 <i class="fa-solid fa-shield-halved admin-lock-icon"></i>
-                <h2>Rick_Dev Secure Vault</h2>
-                <p>Secured via Ctrl + Shift + Alt + F2. Enter your master passcode to access analytics & records.</p>
-                <div class="form-group" style="margin-top: 20px;">
-                    <input type="password" id="adminPassInput" placeholder="Enter Passcode..." style="width:100%; background:var(--card-bg); border:1px solid var(--card-border); padding:14px; border-radius:12px; color:var(--text-main); text-align:center; font-size:1.2rem; letter-spacing:4px; outline:none;">
-                </div>
-                <button id="adminLoginBtn" class="btn-primary" style="width:100%; margin-top: 15px;">Unlock Admin Vault</button>
+                <h2>Rick_Dev World Control Room</h2>
+                <p style="color:var(--text-muted); font-size:0.85rem; margin-top:6px;">Enter master passcode (2285):</p>
+                <!-- Secure Passcode Input (Masked with dots) -->
+                <input type="password" id="adminPassInput" placeholder="••••" style="width:100%; background:var(--card-bg); border:1px solid var(--card-border); padding:12px; border-radius:10px; color:var(--text-main); text-align:center; font-size:1.3rem; letter-spacing:4px; margin:15px 0; outline:none;" autocomplete="new-password">
+                <button id="adminLoginBtn" class="btn-primary" style="width:100%;">Unlock World Control Room</button>
             </div>
 
-            <!-- Admin Menu Hub -->
             <div id="adminHubScreen" class="admin-screen" style="display:none;">
                 <div class="admin-dash-header">
-                    <h2><i class="fa-solid fa-gauge-high"></i> Admin Control Hub</h2>
-                    <span class="admin-badge">Connected to Firestore</span>
+                    <h2><i class="fa-solid fa-earth-americas"></i> World Control Room Hub</h2>
+                    <span class="admin-badge">Firestore Synced</span>
                 </div>
-                <p style="color:var(--text-muted); margin-bottom:20px; text-align:left;">Choose which database management section you would like to access:</p>
+                <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:15px;">Select a control sector to manage the entire website:</p>
                 
                 <div class="admin-hub-grid">
-                    <div class="hub-card" id="gotoAnalyticsHub">
-                        <i class="fa-solid fa-chart-pie" style="color:#a855f7;"></i>
-                        <h3>Traffic Visualizer (Feature 6)</h3>
-                        <p>View visual percentage distribution bars for visits and popularity.</p>
+                    <div class="hub-card" id="gotoSystemSector">
+                        <i class="fa-solid fa-microchip" style="color:#f59e0b;"></i>
+                        <h3>📁 site_config</h3>
+                        <p>Lockdown, Maintenance, Announcements & Auto-Lock Countdowns.</p>
                     </div>
-                    <div class="hub-card" id="gotoVisitsHub">
-                        <i class="fa-solid fa-chart-line" style="color:#38bdf8;"></i>
-                        <h3>Website Visits Analytics</h3>
-                        <p>See exactly how many visits each specific website has received.</p>
+                    <div class="hub-card" id="gotoWebsitesSector">
+                        <i class="fa-solid fa-globe" style="color:#38bdf8;"></i>
+                        <h3>📁 projects_database</h3>
+                        <p>Add new websites, delete apps, and manage URLs directly.</p>
                     </div>
-                    <div class="hub-card" id="gotoLikesHub">
-                        <i class="fa-solid fa-heart" style="color:#f43f5e;"></i>
-                        <h3>See Who Liked</h3>
-                        <p>Inspect exact names and handles of users who liked your websites.</p>
+                    <div class="hub-card" id="gotoFeedbackSector">
+                        <i class="fa-solid fa-comments" style="color:#a855f7;"></i>
+                        <h3>📁 user_feedback</h3>
+                        <p>Categorized feedback & bug reports submitted by visitors.</p>
                     </div>
-                    <div class="hub-card" id="gotoFeedbackHub">
-                        <i class="fa-solid fa-comments"></i>
-                        <h3>Manage Feedback</h3>
-                        <p>View user submissions, app ideas, and delete outdated entries.</p>
-                    </div>
-                    <div class="hub-card" id="gotoDislikesHub">
-                        <i class="fa-solid fa-thumbs-down"></i>
-                        <h3>Review Dislikes</h3>
-                        <p>Inspect user feedback on why projects received negative ratings.</p>
-                    </div>
-                    <div class="hub-card" id="gotoWebsitesHub">
-                        <i class="fa-solid fa-globe"></i>
-                        <h3>Manage Likes</h3>
-                        <p>Directly override and edit like counts for any project.</p>
+                    <div class="hub-card" id="gotoAnalyticsSector">
+                        <i class="fa-solid fa-chart-pie" style="color:#f43f5e;"></i>
+                        <h3>📁 analytics_logs</h3>
+                        <p>Traffic counts, like logs, and direct database overrides.</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Analytics Visualizer Screen (Feature 6) -->
-            <div id="adminAnalyticsScreen" class="admin-screen" style="display:none;">
+            <!-- SECTOR 1: site_config -->
+            <div id="adminSystemScreen" class="admin-screen" style="display:none;">
                 <div class="admin-dash-header">
-                    <div>
-                        <button class="back-hub-btn" id="backToHubFromAnalytics"><i class="fa-solid fa-arrow-left"></i> Hub Menu</button>
-                        <h2 style="margin-top:8px;">📈 Traffic & Engagement Visualizer</h2>
-                    </div>
-                    <span class="admin-badge">Percentage Breakdown</span>
+                    <button class="back-hub-btn" id="backToHubFromSystem"><i class="fa-solid fa-arrow-left"></i> Hub</button>
+                    <h2>📁 site_config (System Master Control)</h2>
                 </div>
-                <div class="admin-entries-list" id="adminAnalyticsList"></div>
+                <div class="admin-entries-list" style="display:flex; flex-direction:column; gap:12px;">
+                    <div class="admin-entry-card" style="flex-direction:column; gap:8px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                            <div>
+                                <h4 style="color:#ef4444;"><i class="fa-solid fa-lock"></i> Website Lock (`website_lock`)</h4>
+                                <p style="font-size:0.75rem; color:var(--text-muted);">Instantly lock out all visitors across the world.</p>
+                            </div>
+                            <input type="checkbox" id="dbWebsiteLockToggle" style="width:22px; height:22px; cursor:pointer;">
+                        </div>
+                    </div>
+
+                    <div class="admin-entry-card" style="flex-direction:column; gap:8px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                            <div>
+                                <h4 style="color:#38bdf8;"><i class="fa-solid fa-screwdriver-wrench"></i> Maintenance Mode (`maintenance_mode`)</h4>
+                                <p style="font-size:0.75rem; color:var(--text-muted);">Enable maintenance notice banner; browsing remains functional.</p>
+                            </div>
+                            <input type="checkbox" id="dbMaintenanceToggle" style="width:22px; height:22px; cursor:pointer;">
+                        </div>
+                    </div>
+
+                    <div class="admin-entry-card" style="flex-direction:column; gap:8px;">
+                        <div style="width:100%;">
+                            <h4 style="color:#a855f7;"><i class="fa-solid fa-bullhorn"></i> Global Announcement (`announcement_text`)</h4>
+                            <input type="text" id="dbAnnouncementInput" class="cms-input" placeholder="Type global broadcast..." style="margin-top:6px;">
+                        </div>
+                        <button class="btn-primary" id="saveAnnouncementBtn" style="margin-top:6px; padding:6px 12px; font-size:0.8rem;">Save Announcement</button>
+                    </div>
+
+                    <div class="admin-entry-card" style="flex-direction:column; gap:8px;">
+                        <div style="width:100%;">
+                            <h4 style="color:#f59e0b;"><i class="fa-solid fa-stopwatch"></i> Auto-Lock Countdown Timer (`auto_lock_timer`)</h4>
+                            <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:6px;">Set countdown duration in seconds before auto-lock triggers:</p>
+                            <input type="number" id="dbCountdownInput" class="cms-input" placeholder="e.g. 300 (seconds)" style="margin-bottom:6px;">
+                        </div>
+                        <button class="btn-primary" id="startCountdownBtn" style="padding:6px 12px; font-size:0.8rem;">Start Global Countdown</button>
+                    </div>
+                </div>
             </div>
 
-            <!-- Website Visits Analytics Tab -->
-            <div id="adminVisitsScreen" class="admin-screen" style="display:none;">
+            <!-- SECTOR 2: projects_database (Add/Delete/Manage Websites) -->
+            <div id="adminWebsitesScreen" class="admin-screen" style="display:none;">
                 <div class="admin-dash-header">
-                    <div>
-                        <button class="back-hub-btn" id="backToHubFromVisits"><i class="fa-solid fa-arrow-left"></i> Hub Menu</button>
-                        <h2 style="margin-top:8px;">📊 Website Visits Analytics</h2>
-                    </div>
-                    <span class="admin-badge">Live Traffic Monitor</span>
+                    <button class="back-hub-btn" id="backToHubFromWebsites"><i class="fa-solid fa-arrow-left"></i> Hub</button>
+                    <h2>📁 projects_database (Manage Websites)</h2>
                 </div>
-                <div class="admin-entries-list" id="adminVisitsList"></div>
+                <div class="admin-entries-list" style="display:flex; flex-direction:column; gap:12px;">
+                    <div class="admin-entry-card" style="flex-direction:column; gap:8px; background:rgba(99,102,241,0.08); border-color:var(--primary);">
+                        <h4 style="color:#818cf8;"><i class="fa-solid fa-plus"></i> Add New Website Directly</h4>
+                        <input type="text" id="newAppName" class="cms-input" placeholder="Website Name">
+                        <input type="text" id="newAppUrl" class="cms-input" placeholder="Website URL (https://...)">
+                        <input type="text" id="newAppCategory" class="cms-input" placeholder="Category (e.g. Tools, Games, Roblox)">
+                        <textarea id="newAppDesc" class="cms-input" placeholder="Description..." rows="2"></textarea>
+                        <button class="btn-primary" id="addNewAppBtn" style="margin-top:6px;"><i class="fa-solid fa-cloud-arrow-up"></i> Deploy Website to Database</button>
+                    </div>
+                    <h4 style="margin-top:10px;">Existing Active Websites:</h4>
+                    <div id="adminWebsitesListContainer" style="display:flex; flex-direction:column; gap:8px;"></div>
+                </div>
             </div>
 
-            <!-- Likes Manager -->
-            <div id="adminLikesScreen" class="admin-screen" style="display:none;">
-                <div class="admin-dash-header">
-                    <div>
-                        <button class="back-hub-btn" id="backToHubFromLikes"><i class="fa-solid fa-arrow-left"></i> Hub Menu</button>
-                        <h2 style="margin-top:8px;">❤️ Voter Records (Who Liked)</h2>
-                    </div>
-                    <span class="admin-badge">Live Database Log</span>
-                </div>
-                <div class="admin-entries-list" id="adminLikesList"></div>
-            </div>
-
-            <!-- Feedback Manager -->
+            <!-- SECTOR 3: user_feedback (Categorized Feedback & Bugs) -->
             <div id="adminFeedbackScreen" class="admin-screen" style="display:none;">
                 <div class="admin-dash-header">
-                    <div>
-                        <button class="back-hub-btn" id="backToHubFromFeedback"><i class="fa-solid fa-arrow-left"></i> Hub Menu</button>
-                        <h2 style="margin-top:8px;">💬 User Feedback & Ideas</h2>
-                    </div>
-                    <span class="admin-badge">Database Sync Active</span>
+                    <button class="back-hub-btn" id="backToHubFromFeedback"><i class="fa-solid fa-arrow-left"></i> Hub</button>
+                    <h2>📁 user_feedback (Categorized Submissions)</h2>
                 </div>
-                <div class="admin-filter-tabs">
-                    <button class="filter-btn active" data-admin-filter="All">All</button>
-                    <button class="filter-btn" data-admin-filter="Website Idea">💡 Ideas</button>
-                    <button class="filter-btn" data-admin-filter="General Feedback">💬 Feedback</button>
-                    <button class="filter-btn" data-admin-filter="Bug Report">🐛 Bugs</button>
+                <div class="admin-filter-tabs" style="margin-bottom:10px; display:flex; gap:6px;">
+                    <button class="filter-btn active" data-feedback-cat="All">All</button>
+                    <button class="filter-btn" data-feedback-cat="Website Idea">💡 Ideas</button>
+                    <button class="filter-btn" data-feedback-cat="General Feedback">💬 Feedback</button>
+                    <button class="filter-btn" data-feedback-cat="Bug Report">🐛 Bug Reports</button>
                 </div>
                 <div class="admin-entries-list" id="adminEntriesList"></div>
             </div>
 
-            <!-- Dislikes Manager -->
-            <div id="adminDislikesScreen" class="admin-screen" style="display:none;">
+            <!-- SECTOR 4: analytics_logs -->
+            <div id="adminAnalyticsScreen" class="admin-screen" style="display:none;">
                 <div class="admin-dash-header">
-                    <div>
-                        <button class="back-hub-btn" id="backToHubFromDislikes"><i class="fa-solid fa-arrow-left"></i> Hub Menu</button>
-                        <h2 style="margin-top:8px;">👎 User Dislike Reports</h2>
-                    </div>
-                    <span class="admin-badge">Reason Logs Active</span>
+                    <button class="back-hub-btn" id="backToHubFromAnalytics"><i class="fa-solid fa-arrow-left"></i> Hub</button>
+                    <h2>📁 analytics_logs (Traffic & Like Overrides)</h2>
                 </div>
-                <div class="admin-entries-list" id="adminDislikesList"></div>
-            </div>
-
-            <!-- Website CMS & Direct Like Modifier Manager -->
-            <div id="adminWebsitesScreen" class="admin-screen" style="display:none;">
-                <div class="admin-dash-header">
-                    <div>
-                        <button class="back-hub-btn" id="backToHubFromWebsites"><i class="fa-solid fa-arrow-left"></i> Hub Menu</button>
-                        <h2 style="margin-top:8px;">🌐 Manage Likes & Stats</h2>
-                    </div>
-                    <button class="btn-primary" id="resetAllLikesBtn" style="padding:8px 14px; font-size:0.85rem; background:linear-gradient(135deg, #ef4444, #dc2626);"><i class="fa-solid fa-rotate-right"></i> Reset All Stats</button>
-                </div>
-                <div class="admin-entries-list" id="adminWebsitesList" style="margin-top:15px;"></div>
+                <div class="admin-entries-list" id="adminAnalyticsList"></div>
             </div>
         </div>
     </div>
 
-    <!-- Import sites.js and script.js -->
     <script type="module" src="sites.js"></script>
     <script type="module" src="script.js"></script>
 </body>
