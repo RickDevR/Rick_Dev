@@ -19,7 +19,7 @@ let projects = [];
 let statsData = {};
 let customProjects = [];
 let usersMap = {}; 
-let siteSpecificStatus = {}; // Tracks locked/maintenance per app
+let siteSpecificStatus = {}; 
 let soundEnabled = true;
 let lockdownCountdownInterval = null;
 let announcementInterval = null;
@@ -83,30 +83,46 @@ document.addEventListener("DOMContentLoaded", () => {
             const rawVal = document.getElementById("voterNameInput").value.trim();
             if (!rawVal) return;
 
-            const userRef = doc(db, "users", rawVal);
-            const userSnap = await getDoc(userRef);
-
-            if (userSnap.exists() && myUsername !== rawVal) {
-                alert("This username is already taken! Please choose another one.");
+            // If username is unchanged, just close modal
+            if (myUsername === rawVal) {
+                if (voterIdentityModal) voterIdentityModal.classList.remove("active");
                 return;
             }
 
-            if (myUsername && myUsername !== rawVal) {
-                localStorage.setItem("rick_dev_username", rawVal);
-            } else if (!myUsername) {
-                localStorage.setItem("rick_dev_username", rawVal);
+            // Check if new username is already taken by someone else
+            const newUserRef = doc(db, "users", rawVal);
+            const newUserSnap = await getDoc(newUserRef);
+
+            if (newUserSnap.exists()) {
+                alert("This username is already taken by another user! Please choose a different name.");
+                return;
             }
 
-            myUsername = rawVal;
-            if (voterIdentityModal) voterIdentityModal.classList.remove("active");
-            playUiSound('success');
-            showToast(`Username set to ${rawVal}!`);
+            // Preserve existing role before migrating
+            let preservedRole = 'member';
+            if (myUsername) {
+                const oldUserRef = doc(db, "users", myUsername);
+                const oldUserSnap = await getDoc(oldUserRef);
+                if (oldUserSnap.exists()) {
+                    preservedRole = oldUserSnap.data().role || 'member';
+                    // Delete old document to free up old username
+                    await deleteDoc(oldUserRef);
+                }
+            }
 
-            await setDoc(userRef, {
+            // Create new username document in Firestore carrying over the exact role
+            await setDoc(newUserRef, {
                 username: rawVal,
-                role: userSnap.exists() ? (userSnap.data().role || 'member') : 'member',
+                role: preservedRole,
                 lastActive: new Date().toLocaleString()
             }, { merge: true });
+
+            localStorage.setItem("rick_dev_username", rawVal);
+            myUsername = rawVal;
+
+            if (voterIdentityModal) voterIdentityModal.classList.remove("active");
+            playUiSound('success');
+            showToast(`Username updated to ${rawVal} (Role: ${preservedRole})!`);
 
             updateHeaderDisplay();
         });
@@ -155,9 +171,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return `<span class="role-badge member"><i class="fa-solid fa-star"></i> Member</span>`;
     }
 
-    // --- MODULAR FIRESTORE DOCUMENTS LISTENERS (`site_config/*`) ---
-    
-    // 1. Master Lockdown Document
     onSnapshot(doc(db, "site_config", "master_lockdown"), (docSnap) => {
         const lockdownScreen = document.getElementById("websiteLockdownScreen");
         const lockdownReasonText = document.getElementById("lockdownReasonText");
@@ -200,7 +213,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 1000);
     }
 
-    // 2. Maintenance Document
     onSnapshot(doc(db, "site_config", "maintenance"), (docSnap) => {
         const maintBanner = document.getElementById("maintenanceBanner");
         const maintBannerText = document.getElementById("maintenanceBannerText");
@@ -246,7 +258,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 1000);
     }
 
-    // 3. Announcement Document
     onSnapshot(doc(db, "site_config", "announcement"), (docSnap) => {
         const annBanner = document.getElementById("globalAnnouncementBanner");
         const annSenderBox = document.getElementById("announcementSenderBox");
@@ -295,7 +306,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 1000);
     }
 
-    // 4. Per-Site Specific Locks Document Listener (`site_config/per_site_locks`)
     onSnapshot(doc(db, "site_config", "per_site_locks"), (docSnap) => {
         if (docSnap.exists()) {
             siteSpecificStatus = docSnap.data() || {};
@@ -305,7 +315,6 @@ document.addEventListener("DOMContentLoaded", () => {
         renderProjects();
     });
 
-    // Device Selector & Theme Logic
     const devicePickerModal = document.getElementById("devicePickerModal");
     const savedDeviceMode = localStorage.getItem("rick_dev_device_mode");
 
@@ -374,7 +383,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const savedAccent = localStorage.getItem("rick_dev_accent");
     if (savedAccent) document.body.setAttribute("data-accent-color", savedAccent);
 
-    // Core Elements
     const grid = document.getElementById("projectsGrid");
     const filterBar = document.getElementById("filterBar");
     const searchInput = document.getElementById("searchInput");
@@ -569,7 +577,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Hub Navigations
     const gotoSystem = document.getElementById("gotoSystemSector");
     const gotoWebsiteLocks = document.getElementById("gotoWebsiteLocksSector");
     const gotoWebsites = document.getElementById("gotoWebsitesSector");
@@ -580,7 +587,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (gotoWebsites) gotoWebsites.addEventListener("click", () => { if (adminHubScreen) adminHubScreen.style.display = "none"; if (adminWebsitesScreen) adminWebsitesScreen.style.display = "flex"; loadAdminWebsitesManager(); });
     if (gotoFeedback) gotoFeedback.addEventListener("click", () => { if (adminHubScreen) adminHubScreen.style.display = "none"; if (adminFeedbackScreen) adminFeedbackScreen.style.display = "flex"; loadAdminFeedback(); });
 
-    // Back Buttons
     const backSystem = document.getElementById("backToHubFromSystem");
     const backLocks = document.getElementById("backToHubFromLocks");
     const backWebsites = document.getElementById("backToHubFromWebsites");
@@ -591,7 +597,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (backWebsites) backWebsites.addEventListener("click", () => { if (adminWebsitesScreen) adminWebsitesScreen.style.display = "none"; if (adminHubScreen) adminHubScreen.style.display = "flex"; });
     if (backFeedback) backFeedback.addEventListener("click", () => { if (adminFeedbackScreen) adminFeedbackScreen.style.display = "none"; if (adminHubScreen) adminHubScreen.style.display = "flex"; });
 
-    // Role Manager
     const saveUserRoleBtn = document.getElementById("saveUserRoleBtn");
     if (saveUserRoleBtn) {
         saveUserRoleBtn.addEventListener("click", async () => {
@@ -625,7 +630,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Modular Document 1: site_config/master_lockdown
     const lockdownTypeSelect = document.getElementById("lockdownTypeSelect");
     const lockTimeVal = document.getElementById("lockTimeVal");
     const lockTimeUnit = document.getElementById("lockTimeUnit");
@@ -674,7 +678,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Modular Document 2: site_config/maintenance
     const maintTypeSelect = document.getElementById("maintTypeSelect");
     const maintTimeVal = document.getElementById("maintTimeVal");
     const maintTimeUnit = document.getElementById("maintTimeUnit");
@@ -724,7 +727,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Modular Document 3: site_config/announcement
     const saveAnnouncementDocBtn = document.getElementById("saveAnnouncementDocBtn");
     const removeAnnouncementDocBtn = document.getElementById("removeAnnouncementDocBtn");
 
@@ -748,7 +750,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Per-Site Specific Locks & Maintenance Manager UI
     function loadPerSiteLocksManager() {
         const container = document.getElementById("perSiteLocksContainer");
         if (!container) return;
